@@ -1,10 +1,7 @@
 package fin.diplom.kachalka;
 
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -15,17 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import java.lang.reflect.Modifier;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class NotebookFragment extends Fragment  {
 
@@ -34,43 +32,84 @@ public class NotebookFragment extends Fragment  {
     ArrayList<String> months;
     ArrayList<String> years;
     LinearLayout workouts_layout;
-    //    private static final String ARG_PARAM1 = "param1";
-//    private static final String ARG_PARAM2 = "param2";
-//
-//    private String mParam1;
-//    private String mParam2;
-    private HashMap<Integer, ArrayList<Integer>> calendar;
-    private HashMap<Integer, HashMap<Integer, HashMap<Integer,ArrayList<HashMap<String, String>>>>> workouts;
-    private HashMap<String, ArrayList<ArrayList<HashMap<String, String>>>> exercises;
+    NotebookFragment nf;
+
 
 
     public void create_spinner(View view, Spinner s, ArrayList<String> al){
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, al);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, al);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(adapter);
     }
 
-    public void fill_workouts(Integer day, String month, View view, ArrayList<HashMap<String, String>> workout_day, ArrayList<ArrayList<HashMap<String, String>>> exercises, LinearLayout workouts_layout){
-        System.out.println(workout_day);
-        for(HashMap<String, String> workout:workout_day){
+    public void fill_year_spinner(View view, JSONObject response, ArrayList<Object> objects){
+        years = new ArrayList<>();
+
+        for(Double el:(ArrayList<Double>) new Gson().fromJson(String.valueOf(response), HashMap.class).get("years")){
+            years.add(String.valueOf(el).substring(0,4));
+        }
+
+        create_spinner(view, (Spinner) objects.get(0), years);
+    }
+
+    public void fill_month_spinner(View view, JSONObject response, ArrayList<Object> objects){
+        months = new ArrayList<>();
+
+        for(Double el:(ArrayList<Double>) new Gson().fromJson(String.valueOf(response), HashMap.class).get("months")){
+            months.add(getResources().getStringArray(R.array.months_list)[(int) Math.round(el)-1]);
+        }
+
+        create_spinner(view, (Spinner) objects.get(0), months);
+    }
+
+    public void fill_workouts(View view, JSONObject response){
+
+
+        ArrayList workouts = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("workouts");
+
+
+        HashMap<Integer,ArrayList<Map>> days = new HashMap<>();
+
+        for(Object workout:workouts){
+            int day =  ((Double)((Map)workout).get("day")).intValue();
+            days.computeIfAbsent(day, k -> new ArrayList<>());
+            days.get(day).add((Map) workout);
+        }
+
+        for(Integer day:days.keySet()){
+            workouts_layout.addView(new LinearLayout(view.getContext()){{
+                setOrientation(LinearLayout.VERTICAL);
+                setBackground(getResources().getDrawable(R.drawable.border));
+
+
+                setLayoutParams(new MarginLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)){{
+                    setMargins(5,5,5,5);
+                }});
+            }});
+            draw_workouts(view, days.get(day), workouts_layout);
+        }
+    }
+
+    public void draw_workouts(View view, ArrayList<Map> workout_day, LinearLayout workouts_layout){
+        for(Map workout:workout_day){
+
             LinearLayout l = new LinearLayout(view.getContext()){{
                 setOrientation(LinearLayout.VERTICAL);
                 setPadding(10,10,10,10);
                 setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//                setDividerDrawable(getResources().getDrawable(R.style.Divider_Horizontal) );
 
                 addView(new AppCompatTextView(view.getContext()){{
                     setPadding(0,0,0,15);
 
                     setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    setText(workout.get("Name"));
+                    setText((String)workout.get("name"));
                 }});
 
                 addView(new AppCompatTextView(view.getContext()){{
                     setPadding(0,0,0,10);
                     setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    setText(day+ ", "+month);
+                    setText(workout.get("day")+ ", "+getResources().getStringArray(R.array.months_list)[((Double)workout.get("month")).intValue()-1]);
                 }});
 
                 addView(new LinearLayout(view.getContext()){{
@@ -83,7 +122,7 @@ public class NotebookFragment extends Fragment  {
                         setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                             weight = 1.0f;
                         }});
-                        setText(workout.get("Length"));
+                        setText(String.valueOf(workout.get("length")));
                     }});
 
                     addView(new AppCompatTextView(view.getContext()){{
@@ -97,7 +136,7 @@ public class NotebookFragment extends Fragment  {
                         setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                             weight = 1.0f;
                         }});
-                        setText(workout.get("Personal_highscores_amount"));
+                        setText(String.valueOf(workout.get("personal_highscores_amount")));
                     }});
                 }});
 
@@ -110,16 +149,21 @@ public class NotebookFragment extends Fragment  {
                         setOrientation(LinearLayout.HORIZONTAL);
 
                         addView(new AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
+                                weight = 1.0f;
+                            }});
                             setText("Exercise");
                         }});
                         addView(new AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
+                                weight = 1.0f;
+                            }});
                             setText("Sets");
                         }});
                     }});
 
-                    for(HashMap<String, String> x:exercises.get(Integer.parseInt(workout.get("Exercise_id")))){
+                    for(Object ex:(ArrayList)workout.get("exercises")){
+                        Map x = (Map)ex;
                         addView(new LinearLayout(view.getContext()){{
                             setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                             setOrientation(LinearLayout.HORIZONTAL);
@@ -128,14 +172,14 @@ public class NotebookFragment extends Fragment  {
                                 setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                                     weight = 1.0f;
                                 }});
-                                setText(x.get("Name"));
+                                setText((String) x.get("name"));
                             }});
 
                             addView(new AppCompatTextView(view.getContext()){{
                                 setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                                     weight = 1.0f;
                                 }});
-                                setText(x.get("Weights")+"kg x "+x.get("Reps"));
+                                setText( x.get("weight")+"kg x "+x.get("reps"));
                             }});
                         }});
                     }
@@ -172,38 +216,11 @@ public class NotebookFragment extends Fragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        nf = this;
+
 //        if (savedInstanceState != null) {
 //            //Restore the fragment's state here
 //        }
-
-        if (getArguments() != null) {
-            workouts = (HashMap<Integer, HashMap<Integer, HashMap<Integer,ArrayList<HashMap<String, String>>>>>)(getArguments().getSerializable("Workouts"));
-            exercises = (HashMap<String, ArrayList<ArrayList<HashMap<String, String>>>>)(getArguments().getSerializable("Exercises"));
-        }
-
-        calendar = new HashMap<>();
-        for(int year:workouts.keySet()){
-            calendar.put(year, new ArrayList<>());
-            for (int month:workouts.get(year).keySet()){
-                calendar.get(year).add(month);
-            }
-        }
-
-
-
-        years = new ArrayList<>();
-        months = new ArrayList<>();
-
-        for ( Integer key : calendar.keySet() ) {
-            years.add(key.toString());
-        }
-        Collections.sort(years);
-        Collections.reverse(years);
-
-        for (Integer month : calendar.get(Integer.parseInt(years.get(0)))){
-            months.add(getResources().getStringArray(R.array.months_list)[month-1]);
-        }
-
 
     }
 
@@ -215,25 +232,32 @@ public class NotebookFragment extends Fragment  {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Method fill_year_spinner = null;
+        try {
+            fill_year_spinner = NotebookFragment.class.getMethod("fill_year_spinner", View.class, JSONObject.class, ArrayList.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         year_spinner = view.findViewById(R.id.year_spinner);
         month_spinner = view.findViewById(R.id.month_spinner);
         workouts_layout = view.findViewById(R.id.workouts_layout);
 
-        create_spinner(view, year_spinner, years);
+        MainActivity.get_request(nf, "return_workout_years", view, fill_year_spinner, new ArrayList<Object>(){{add(year_spinner);}});
 
         year_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View v, int pos, long id) {
-                months.clear();
-
-                Collections.sort(calendar.get(Integer.parseInt(years.get(pos))));
-                Collections.reverse(calendar.get(Integer.parseInt(years.get(pos))));
-
-                for (Integer month : calendar.get(Integer.parseInt(years.get(pos)))){
-                    months.add(getResources().getStringArray(R.array.months_list)[month-1]);
+                Method fill_month_spinner = null;
+                try {
+                    fill_month_spinner = NotebookFragment.class.getMethod("fill_month_spinner", View.class, JSONObject.class, ArrayList.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                create_spinner(view, month_spinner, months);
+                MainActivity.get_request(nf, "return_workout_months/"+years.get(pos), view, fill_month_spinner, new ArrayList<Object>(){{add(month_spinner);}});
             }
 
             @Override
@@ -246,27 +270,16 @@ public class NotebookFragment extends Fragment  {
             public void onItemSelected(AdapterView<?> adapterView, View v, int pos, long l) {
                 workouts_layout.removeAllViews();
                 int year = Integer.parseInt ((String) year_spinner.getSelectedItem());
-                int month = calendar.get(year).get(pos);
+                int month = Arrays.asList(getResources().getStringArray(R.array.months_list)).indexOf(months.get(pos))+1;
 
-//                System.out.println(workouts+"\n________________________________________________");
-                if(workouts.keySet().contains(year) && workouts.get(year).containsKey(month)){
-                    for(Integer day : workouts.get(year).get(month).keySet()){
-                        workouts_layout.addView(new LinearLayout(view.getContext()){{
-                           setOrientation(LinearLayout.VERTICAL);
-                            setBackground(getResources().getDrawable(R.drawable.border));
-
-
-                            setLayoutParams(new MarginLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)){{
-                                setMargins(5,5,5,5);
-                            }});
-                        }});
-
-
-//                        System.out.println(workouts.get(year).get(month).get(day)+"\n______________________________________________");
-                        fill_workouts(day, getResources().getStringArray(R.array.months_list)[month-1], view, workouts.get(year).get(month).get(day), exercises.get("Exercises"), workouts_layout);
-                    }
+                Method fill_workouts = null;
+                try {
+                    fill_workouts = NotebookFragment.class.getMethod("fill_workouts", View.class, JSONObject.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
+                MainActivity.get_request(nf, "return_selected_workouts/"+year+"/"+month, view, fill_workouts, null);
 
             }
 

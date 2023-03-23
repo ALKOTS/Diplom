@@ -1,5 +1,6 @@
 package fin.diplom.kachalka;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -7,11 +8,22 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.view.View;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import fin.diplom.kachalka.databinding.ActivityMainBinding;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,9 +34,36 @@ public class MainActivity extends AppCompatActivity {
     Fragment4 fragment4;
     Fragment5 fragment5;
 
-    HashMap<Integer, HashMap<Integer, HashMap<Integer,ArrayList<HashMap<String, String>>>>> workouts; //year:{month:{day:[{name, length, personal_highscores_amount, exercise_id}]}}
-    HashMap<String, ArrayList<ArrayList<HashMap<String, String>>>> exercises; //name, weight, reps
 
+
+    public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects){
+        String url = "http://10.0.2.2:1488/pract/"+last_url;
+
+
+        RequestQueue queue = Volley.newRequestQueue(view.getContext());
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if (objects != null) {
+                        fill_view.invoke(obj, view, response, objects);
+                    }else {
+                        fill_view.invoke(obj, view, response);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+        queue.add(jor);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,96 +80,7 @@ public class MainActivity extends AppCompatActivity {
         fragment4 = new Fragment4();
         fragment5 = new Fragment5();
 
-        //__________________________________________________________________________________
-
-        workouts = new HashMap<Integer, HashMap<Integer, HashMap<Integer,ArrayList<HashMap<String, String>>>>>(){{
-            put(2018, new HashMap<Integer, HashMap<Integer, ArrayList<HashMap<String,String>>>>(){{
-                put(1, new HashMap<Integer, ArrayList<HashMap<String, String>>>() {{
-                    put(1, new ArrayList<HashMap<String, String>>() {{
-                        add(new HashMap<String, String>() {{
-                            put("Name", "W1.1");
-                            put("Length", "1:00:00");
-                            put("Personal_highscores_amount", "TODO");
-                            put("Exercise_id", "0");
-                        }});
-                        add(new HashMap<String, String>() {{
-                            put("Name", "W1.2");
-                            put("Length", "1:00:00");
-                            put("Personal_highscores_amount", "TODO");
-                            put("Exercise_id", "0");
-                        }});
-                    }});
-                    put(2, new ArrayList<HashMap<String, String>>() {{
-                        add(new HashMap<String, String>() {{
-                            put("Name", "W2");
-                            put("Length", "1:00:00");
-                            put("Personal_highscores_amount", "TODO");
-                            put("Exercise_id", "0");
-                        }});
-                    }});
-                }});
-                put(2, new HashMap<Integer, ArrayList<HashMap<String, String>>>() {{
-                    put(1, new ArrayList<HashMap<String, String>>() {{
-                        add(new HashMap<String, String>() {{
-                            put("Name", "W3");
-                            put("Length", "1:00:00");
-                            put("Personal_highscores_amount", "TODO");
-                            put("Exercise_id", "0");
-                        }});
-                    }});
-                    put(2, new ArrayList<HashMap<String, String>>() {{
-                        add(new HashMap<String, String>() {{
-                            put("Name", "W4");
-                            put("Length", "1:00:00");
-                            put("Personal_highscores_amount", "TODO");
-                            put("Exercise_id", "0");
-                        }});
-                    }});
-                }});
-            }});
-        }};
-
-//        for(int year:workouts.keySet()){
-//            temp_calendar.put(year, new ArrayList<>());
-//            for (int month:workouts.get(year).keySet()){
-//                temp_calendar.get(year).add(month);
-//            }
-//        }
-
-        exercises = new HashMap<String,ArrayList<ArrayList<HashMap<String, String>>>>(){{
-            put("Exercises", new ArrayList<ArrayList<HashMap<String, String>>>(){{
-                add(new ArrayList<HashMap<String, String>>(){{
-                    add(new HashMap<String, String>(){{
-                        put("Name","ss");
-                        put("Weights","55");
-                        put("Reps","2");
-                    }});
-                    add(new HashMap<String, String>(){{
-                        put("Name","aa");
-                        put("Weights","77");
-                        put("Reps","3");
-                    }});
-                }});
-                add(new ArrayList<HashMap<String, String>>(){{
-                    add(new HashMap<String, String>(){{
-                        put("Name","ff");
-                        put("Weights","11");
-                        put("Reps","9");
-                    }});
-                    add(new HashMap<String, String>(){{
-                        put("Name","ww");
-                        put("Weights","00");
-                        put("Reps","1");
-                    }});
-                }});
-            }});
-        }};
-
-
-        //____________________________________________________________________________________
         Bundle notebook_bundle = new Bundle();
-        notebook_bundle.putSerializable("Exercises", exercises);
-        notebook_bundle.putSerializable("Workouts", workouts);
         notebookfragment.setArguments(notebook_bundle);
 
 
@@ -162,6 +112,5 @@ public class MainActivity extends AppCompatActivity {
 
         ft.replace(R.id.main_layout,screen,null).commit();
 
-//        ft.replace(((FrameLayout)findViewById(R.id.main_layout)).getChildAt(0).getId(),screen).setReorderingAllowed(true).commit();
     }
 }
