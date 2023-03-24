@@ -14,7 +14,6 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 public class NewsFragment extends Fragment {
 

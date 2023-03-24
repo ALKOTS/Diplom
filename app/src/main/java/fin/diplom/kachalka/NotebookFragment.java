@@ -1,5 +1,6 @@
 package fin.diplom.kachalka;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
@@ -72,7 +74,7 @@ public class NotebookFragment extends Fragment  {
         HashMap<Integer,ArrayList<Map>> days = new HashMap<>();
 
         for(Object workout:workouts){
-            int day =  ((Double)((Map)workout).get("day")).intValue();
+            int day =  Integer.parseInt ((String) ((Map)workout).get("day"));
             days.computeIfAbsent(day, k -> new ArrayList<>());
             days.get(day).add((Map) workout);
         }
@@ -118,6 +120,10 @@ public class NotebookFragment extends Fragment  {
                     setOrientation(LinearLayout.HORIZONTAL);
                     setPadding(0,0,0,10);
 
+                    addView(new androidx.appcompat.widget.AppCompatImageView(view.getContext()){{
+
+                        setImageResource(R.drawable.time);
+                    }});
                     addView(new AppCompatTextView(view.getContext()){{
                         setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                             weight = 1.0f;
@@ -179,7 +185,7 @@ public class NotebookFragment extends Fragment  {
                                 setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                                     weight = 1.0f;
                                 }});
-                                setText( x.get("weight")+"kg x "+x.get("reps"));
+                                setText(x.get("weight")+"kg x "+x.get("reps"));
                             }});
                         }});
                     }
@@ -280,15 +286,11 @@ public class NotebookFragment extends Fragment  {
                 }
 
                 MainActivity.get_request(nf, "return_selected_workouts/"+year+"/"+month, view, fill_workouts, null);
-
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
-
-
     }
 }

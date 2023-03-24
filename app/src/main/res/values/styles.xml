@@ -14,4 +14,9 @@
         <item name="android:layout_width">1dp</item>
         <item name="android:layout_height">match_parent</item>
     </style>
+
+    <style name="Temka" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/zjoltii</item>
+        <item name="colorControlNormal">@color/cyan</item>
+    </style>
 </resources>
