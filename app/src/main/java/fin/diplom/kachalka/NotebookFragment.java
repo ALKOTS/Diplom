@@ -285,7 +285,7 @@ public class NotebookFragment extends Fragment  {
                     e.printStackTrace();
                 }
 
-                MainActivity.get_request(nf, "return_selected_workouts/"+year+"/"+month, view, fill_workouts, null);
+                MainActivity.get_request(nf, "return_workouts/"+year+"/"+month, view, fill_workouts, null);
             }
 
             @Override

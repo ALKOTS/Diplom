@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -28,8 +29,7 @@ class PostOnClickListener implements View.OnClickListener
 
     Object post;
     ScrollView newsFeedContainer;
-
-    LinearLayout newsFeed, postFeed;
+    LinearLayout newsFeed,postFeed;
 
     public PostOnClickListener(ScrollView news, Object post) {
         this.newsFeedContainer = news;
@@ -40,18 +40,15 @@ class PostOnClickListener implements View.OnClickListener
     @Override
     public void onClick(View v)
     {
-        newsFeedContainer.getChildAt(0).setVisibility(View.GONE);
         postFeed = NewsFragment.draw_post(newsFeedContainer.getChildAt(0), post, false);
         postFeed.removeView(postFeed.getChildAt(postFeed.getChildCount()-1));
 
         postFeed.setOnClickListener(view -> {
-            newsFeedContainer.removeAllViews();
-            newsFeedContainer.addView(newsFeed);
+            ((FrameLayout)newsFeedContainer.getParent()).removeView(((FrameLayout)newsFeedContainer.getParent()).getChildAt(1));
+            newsFeedContainer.setVisibility(View.VISIBLE);
         });
-
-        newsFeedContainer.removeAllViews();
-
-        newsFeedContainer.addView(postFeed);
+        newsFeedContainer.setVisibility(View.GONE);
+        ((FrameLayout)newsFeedContainer.getParent()).addView(postFeed);
     }
 
 }
@@ -62,7 +59,7 @@ public class NewsFragment extends Fragment {
     NewsFragment nf;
     static ScrollView newsFeedContainer;
 
-
+    int news_drawn = 0;
 
     public NewsFragment() {
     }
@@ -120,6 +117,7 @@ public class NewsFragment extends Fragment {
             LinearLayout drawn_post = draw_post(view, post, true);
             drawn_post.setOnClickListener(new PostOnClickListener(newsFeedContainer, post));
             ((LinearLayout)newsFeedContainer.getChildAt(0)).addView(drawn_post);
+
         }
     }
 
@@ -149,14 +147,16 @@ public class NewsFragment extends Fragment {
 
         newsFeedContainer = view.findViewById(R.id.feed);
 
+        Method finalFill_news = fill_news;
         newsFeedContainer.getViewTreeObserver()
                 .addOnScrollChangedListener(() -> {
                     if (newsFeedContainer.getChildAt(0).getBottom() <= (newsFeedContainer.getHeight() + newsFeedContainer.getScrollY())) {
-                        System.out.println("Bottom");
-                    } else {
-                        System.out.println("Suck shit");
+//                        System.out.println("Bottom");
+                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
+                        news_drawn += 10;
                     }
                 });
-        MainActivity.get_request(nf, "return_news", view, fill_news, null);
+        MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null);
+        news_drawn+=10;
     }
 }
