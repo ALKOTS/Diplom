@@ -11,11 +11,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -39,8 +41,22 @@ public class MainActivity extends AppCompatActivity {
     Fragment3 fragment3;
     Fragment4 fragment4;
     Fragment5 fragment5;
-    String authToken;
+    static String authToken;
     static String basic_url = "http://10.0.2.2:1488/pract/";
+
+    public void handle_response(int error_code){
+        String response_text;
+        switch (error_code){
+            case 400:
+                response_text = "Invalid credentials";
+                break;
+            default:
+                response_text = "Error code: "+ error_code;
+                break;
+        }
+        Toast.makeText(getApplicationContext(),
+                response_text, Toast.LENGTH_SHORT).show();
+    }
 
     public void login_request(String login, String password) throws JSONException {
         String url = basic_url + "login/";
@@ -52,16 +68,26 @@ public class MainActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, credentials, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    System.out.println(response);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, credentials, response -> {
+            try {
+                authToken = response.getString("token");
+                startApp();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }, error -> System.out.println(error));
+
+
+        }, error -> {
+            handle_response(error.networkResponse.statusCode);
+        });
+//            @Override
+//            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+//                int mStatusCode = response.statusCode;
+//                System.out.println("3 "+mStatusCode);
+//                return super.parseNetworkResponse(response);
+//            }
+
+
         queue.add(jor);
     }
 
@@ -70,29 +96,31 @@ public class MainActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(view.getContext());
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if (objects != null) {
-                        fill_view.invoke(obj, view, response, objects);
-                    }else {
-                        fill_view.invoke(obj, view, response);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null, response -> {
+            try {
+                if (objects != null) {
+                    fill_view.invoke(obj, view, response, objects);
+                }else {
+                    fill_view.invoke(obj, view, response);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }, error -> System.out.println(error));//{
-//            @Override
-//            public Map getHeaders() throws AuthFailureError {
-//
-//            }
-//        };
+        }, System.out::println){
+            @Override
+            public Map<String,String> getHeaders(){
+                return new HashMap<String, String>(){{
+                    put("Authorization", "Token "+authToken);
+                }};
+            }
+        };
         queue.add(jor);
     }
 
     public void startApp(){
+        findViewById(R.id.login_layout).setVisibility(View.GONE);
+        findViewById(R.id.screens_layout).setVisibility(View.VISIBLE);
+
         changeScreen(new NewsFragment());
         newsfragment = new NewsFragment();
         notebookfragment = new NotebookFragment();
