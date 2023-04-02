@@ -59,7 +59,7 @@ public class NewsFragment extends Fragment {
     NewsFragment nf;
     static ScrollView newsFeedContainer;
 
-    int news_drawn = 0;
+    int news_drawn;
 
     public NewsFragment() {
     }
@@ -126,6 +126,7 @@ public class NewsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         nf = this;
+        news_drawn = -10;
     }
 
     @Override
@@ -152,11 +153,13 @@ public class NewsFragment extends Fragment {
                 .addOnScrollChangedListener(() -> {
                     if (newsFeedContainer.getChildAt(0).getBottom() <= (newsFeedContainer.getHeight() + newsFeedContainer.getScrollY())) {
 //                        System.out.println("Bottom");
-                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
                         news_drawn += 10;
+                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
+
                     }
                 });
-        MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null);
         news_drawn+=10;
+        MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null);
+
     }
 }

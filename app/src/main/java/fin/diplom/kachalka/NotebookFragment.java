@@ -67,7 +67,7 @@ public class NotebookFragment extends Fragment  {
 
     public void fill_workouts(View view, JSONObject response){
 
-
+        System.out.println(response);
         ArrayList workouts = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("workouts");
 
 
@@ -178,7 +178,7 @@ public class NotebookFragment extends Fragment  {
                                 setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                                     weight = 1.0f;
                                 }});
-                                setText((String) x.get("name"));
+                                setText((String) ((Map)x.get("activity")).get("name"));
                             }});
 
                             addView(new AppCompatTextView(view.getContext()){{
