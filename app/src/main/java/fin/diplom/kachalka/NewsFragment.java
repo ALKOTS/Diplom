@@ -10,7 +10,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -23,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class PostOnClickListener implements View.OnClickListener
 {
@@ -59,7 +59,7 @@ public class NewsFragment extends Fragment {
     NewsFragment nf;
     static ScrollView newsFeedContainer;
 
-    int news_drawn;
+    static int news_drawn;
 
     public NewsFragment() {
     }
@@ -117,7 +117,6 @@ public class NewsFragment extends Fragment {
             LinearLayout drawn_post = draw_post(view, post, true);
             drawn_post.setOnClickListener(new PostOnClickListener(newsFeedContainer, post));
             ((LinearLayout)newsFeedContainer.getChildAt(0)).addView(drawn_post);
-
         }
     }
 
@@ -126,7 +125,7 @@ public class NewsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         nf = this;
-        news_drawn = -10;
+        news_drawn = 0;
     }
 
     @Override
@@ -139,6 +138,7 @@ public class NewsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         Method fill_news = null;
+        AtomicInteger lastBottom = new AtomicInteger();
 
         try {
             fill_news = NewsFragment.class.getMethod("fill_news", View.class, JSONObject.class);
@@ -149,17 +149,16 @@ public class NewsFragment extends Fragment {
         newsFeedContainer = view.findViewById(R.id.feed);
 
         Method finalFill_news = fill_news;
-        newsFeedContainer.getViewTreeObserver()
-                .addOnScrollChangedListener(() -> {
-                    if (newsFeedContainer.getChildAt(0).getBottom() <= (newsFeedContainer.getHeight() + newsFeedContainer.getScrollY())) {
-//                        System.out.println("Bottom");
-                        news_drawn += 10;
-                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
 
-                    }
-                });
-        news_drawn+=10;
         MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null);
 
+        newsFeedContainer.getViewTreeObserver()
+                .addOnScrollChangedListener(() -> {
+                    if ((newsFeedContainer.getChildAt(0).getBottom() <= (newsFeedContainer.getHeight() + newsFeedContainer.getScrollY())) && newsFeedContainer.getChildAt(0).getBottom()> lastBottom.get()) {
+                        news_drawn+=10;
+                        lastBottom.set(newsFeedContainer.getChildAt(0).getBottom());
+                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
+                    }
+                });
     }
 }

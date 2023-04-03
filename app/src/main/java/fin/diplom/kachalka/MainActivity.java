@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -35,30 +36,38 @@ import fin.diplom.kachalka.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    static Context ctx;
     ActivityMainBinding binding;
     NewsFragment newsfragment;
     NotebookFragment notebookfragment;
     Fragment3 fragment3;
     Fragment4 fragment4;
     Fragment5 fragment5;
-    static String authToken;
+    static String authToken = "b4219c9acf9784f39842497a4c3ae8463252cc02";
     static String basic_url = "http://10.0.2.2:1488/pract/";
 
-    public void handle_response(int error_code){
+//    public static Context getAppContext() {
+//        return ctx;
+//    }
+
+    public static void handle_response(int error_code){
         String response_text;
         switch (error_code){
             case 400:
                 response_text = "Invalid credentials";
                 break;
+            case 401:
+                response_text = "Unauthorized request";
+                break;
             default:
                 response_text = "Error code: "+ error_code;
                 break;
         }
-        Toast.makeText(getApplicationContext(),
+        Toast.makeText(ctx,
                 response_text, Toast.LENGTH_SHORT).show();
     }
 
-    public void login_request(String login, String password) throws JSONException {
+    public  void login_request(String login, String password) throws JSONException {
         String url = basic_url + "login/";
 
         JSONObject  credentials = new JSONObject (){{
@@ -71,15 +80,15 @@ public class MainActivity extends AppCompatActivity {
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, credentials, response -> {
             try {
                 authToken = response.getString("token");
+                ctx.getSharedPreferences("AuthPrefs", MODE_PRIVATE).edit().putString("authToken", authToken).apply();
+//                System.out.println(authToken);
                 startApp();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
-        }, error -> {
-            handle_response(error.networkResponse.statusCode);
-        });
+        }, error -> handle_response(error.networkResponse.statusCode));
 //            @Override
 //            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
 //                int mStatusCode = response.statusCode;
@@ -106,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, System.out::println){
+        }, error -> handle_response(error.networkResponse.statusCode)){
             @Override
             public Map<String,String> getHeaders(){
                 return new HashMap<String, String>(){{
@@ -119,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void startApp(){
         findViewById(R.id.login_layout).setVisibility(View.GONE);
-        findViewById(R.id.screens_layout).setVisibility(View.VISIBLE);
+        findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
 
         changeScreen(new NewsFragment());
         newsfragment = new NewsFragment();
@@ -162,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
         findViewById(R.id.login_layout).setVisibility(View.GONE);
+        ctx = getApplicationContext();
 
-        SharedPreferences sharedPreferences = this.getSharedPreferences("AuthPrefs", MODE_PRIVATE);
-        authToken = sharedPreferences.getString("authToken", null);
+        authToken = this.getSharedPreferences("AuthPrefs", MODE_PRIVATE).getString("authToken", null);
 
         if(authToken == null) {
             findViewById(R.id.main_layout).setVisibility(View.GONE);
