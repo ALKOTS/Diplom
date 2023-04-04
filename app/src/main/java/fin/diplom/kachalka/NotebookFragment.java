@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -128,7 +129,7 @@ public class NotebookFragment extends Fragment  {
                         setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                             weight = 1.0f;
                         }});
-                        setText(String.valueOf(workout.get("length")));
+                        setText( String.valueOf(new DecimalFormat("#.00").format( Float.parseFloat(String.valueOf(workout.get("length")))/60/60 )) );
                     }});
 
                     addView(new AppCompatTextView(view.getContext()){{

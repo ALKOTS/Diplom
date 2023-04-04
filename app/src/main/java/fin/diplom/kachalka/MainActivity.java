@@ -3,24 +3,24 @@ package fin.diplom.kachalka;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,18 +33,20 @@ import java.util.Map;
 import fin.diplom.kachalka.databinding.ActivityMainBinding;
 
 
-
 public class MainActivity extends AppCompatActivity {
 
     static Context ctx;
     ActivityMainBinding binding;
     NewsFragment newsfragment;
     NotebookFragment notebookfragment;
-    Fragment3 fragment3;
+    AddWorkoutLayout addWorkoutLayout;
+    static ConstraintLayout mainLayout;
+    static LinearLayout loginLayout;
     Fragment4 fragment4;
     Fragment5 fragment5;
-    static String authToken = "b4219c9acf9784f39842497a4c3ae8463252cc02";
+    static String authToken = "";
     static String basic_url = "http://10.0.2.2:1488/pract/";
+    LinearLayout registerLayout;
 
 //    public static Context getAppContext() {
 //        return ctx;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 401:
                 response_text = "Unauthorized request";
+                forceLogin();
                 break;
             default:
                 response_text = "Error code: "+ error_code;
@@ -67,7 +70,37 @@ public class MainActivity extends AppCompatActivity {
                 response_text, Toast.LENGTH_SHORT).show();
     }
 
-    public  void login_request(String login, String password) throws JSONException {
+    public void register_request(JSONObject credentials){
+        String url = basic_url + "register/";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, credentials, response -> {
+            try {
+//                System.out.println(response);
+                if(response.getString("response").equals("Success")){
+                    login_request(credentials.getString("login"), credentials.getString("password"));
+                }else{
+//                    new Gson().fromJson((JsonElement) response.get("Errors"), HashMap.class);
+                    Map errors = ((Map)new Gson().fromJson(String.valueOf(response), HashMap.class).get("Errors"));
+                    for (Object error: errors.keySet()){
+                        Toast.makeText(ctx,errors.get(error).toString(), Toast.LENGTH_LONG).show();
+                    }
+
+                }
+//                login_request(credentials.getString("login"), credentials.getString("password"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }, error -> handle_response(error.networkResponse.statusCode));
+
+        queue.add(jor);
+
+    }
+
+    public void login_request(String login, String password) throws JSONException {
         String url = basic_url + "login/";
 
         JSONObject  credentials = new JSONObject (){{
@@ -89,13 +122,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         }, error -> handle_response(error.networkResponse.statusCode));
-//            @Override
-//            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-//                int mStatusCode = response.statusCode;
-//                System.out.println("3 "+mStatusCode);
-//                return super.parseNetworkResponse(response);
-//            }
-
 
         queue.add(jor);
     }
@@ -126,14 +152,19 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
+    public static void forceLogin(){
+        mainLayout.setVisibility(View.GONE);
+        loginLayout.setVisibility(View.VISIBLE);
+    }
+
     public void startApp(){
-        findViewById(R.id.login_layout).setVisibility(View.GONE);
-        findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
+        loginLayout.setVisibility(View.GONE);
+        mainLayout.setVisibility(View.VISIBLE);
 
         changeScreen(new NewsFragment());
         newsfragment = new NewsFragment();
         notebookfragment = new NotebookFragment();
-        fragment3 = new Fragment3();
+        addWorkoutLayout = new AddWorkoutLayout();
         fragment4 = new Fragment4();
         fragment5 = new Fragment5();
 
@@ -150,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     changeScreen(notebookfragment);
                     break;
                 case R.id.item3:
-                    changeScreen(fragment3);
+                    changeScreen(addWorkoutLayout);
                     break;
                 case R.id.item4:
                     changeScreen(fragment4);
@@ -170,14 +201,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
-        findViewById(R.id.login_layout).setVisibility(View.GONE);
+        loginLayout =findViewById(R.id.login_layout);
+        mainLayout=findViewById(R.id.main_layout);
+        registerLayout= findViewById(R.id.register_layout);
+        registerLayout.setVisibility(View.GONE);
+        loginLayout.setVisibility(View.GONE);
         ctx = getApplicationContext();
 
         authToken = this.getSharedPreferences("AuthPrefs", MODE_PRIVATE).getString("authToken", null);
 
         if(authToken == null) {
-            findViewById(R.id.main_layout).setVisibility(View.GONE);
-            findViewById(R.id.login_layout).setVisibility(View.VISIBLE);
+            forceLogin();
         }else{
             startApp();
         }
@@ -194,5 +228,38 @@ public class MainActivity extends AppCompatActivity {
 
     public void onLoginClick(View view) throws JSONException {
         login_request(((EditText)findViewById(R.id.loginField)).getText().toString(),((EditText)findViewById(R.id.passwordField)).getText().toString());
+    }
+
+    public void onRegisterClick(View view) throws JSONException {
+        registerLayout.setVisibility(View.VISIBLE);
+
+        boolean Verifier = true;
+        for(int i = 0; i<registerLayout.getChildCount(); i++){
+            if(String.valueOf(((EditText) registerLayout.getChildAt(i)).getText()).equals("")){
+                Verifier = false;
+                break;
+            }
+        }
+
+        if(!String.valueOf(((EditText) findViewById(R.id.passwordField)).getText()).equals(String.valueOf(((EditText) findViewById(R.id.repeatPasswordField)).getText()))){
+            Verifier = false;
+            Toast.makeText(this, "Passwords are not equal", Toast.LENGTH_SHORT).show();
+        }
+
+        if(Verifier){
+            JSONObject values = new JSONObject(){{
+                put("login", ((EditText)findViewById(R.id.loginField)).getText());
+                put("username", ((EditText)findViewById(R.id.nameField)).getText());
+                put("last_name", ((EditText)findViewById(R.id.lastNameField)).getText());
+                put("email", ((EditText)findViewById(R.id.emailField)).getText());
+                put("password", ((EditText)findViewById(R.id.passwordField)).getText());
+            }};
+            register_request(values);
+        }
+
+
+
+
+
     }
 }
