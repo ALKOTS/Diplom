@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity=""
-    tools:context=".AddWorkoutLayout">
+    tools:context=".AddWorkoutFragment">
 
 <!--    <CalendarView-->
 <!--        android:id="@+id/calendarView2"-->
@@ -22,6 +22,14 @@
             android:layout_margin="10dp"
             android:orientation="vertical">
 
+            <EditText
+                android:id="@+id/editTextTextPersonName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Workout name"
+                android:inputType="textPersonName" />
+
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
@@ -29,29 +37,6 @@
                 android:paddingBottom="5dp"
                 android:text="Create workout"
                 android:textSize="32dp" />
-
-            <EditText
-                android:id="@+id/editTextTextPersonName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint = "Workout name"
-                android:inputType="textPersonName"
-                 />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="5dp">
-
-                <TextView
-                    android:id="@+id/dateView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Workout date"
-                    android:textSize="24dp" />
-            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -94,18 +79,64 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="5dp">
+
+                <TextView
+                    android:id="@+id/dateView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Workout date"
+                    android:textSize="24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <Button
+                    android:id="@+id/addExerciseBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+"/>
             </LinearLayout>
 
             <Button
                 android:id="@+id/button2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Button" />
+                android:text="Accept" />
 
 
         </LinearLayout>
     </ScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/exerciseListLayout"
+        android:elevation="5dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="50dp"
+        android:paddingBottom="50dp"
+        android:background="@drawable/shade"
+        >
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:id="@+id/exerciseList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="vertical"/>
+        </ScrollView>
+    </FrameLayout>
 
 </FrameLayout>

@@ -1,7 +1,6 @@
 package fin.diplom.kachalka;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     NewsFragment newsfragment;
     NotebookFragment notebookfragment;
-    AddWorkoutLayout addWorkoutLayout;
+    AddWorkoutFragment addWorkoutFragment;
     static ConstraintLayout mainLayout;
     static LinearLayout loginLayout;
     Fragment4 fragment4;
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         changeScreen(new NewsFragment());
         newsfragment = new NewsFragment();
         notebookfragment = new NotebookFragment();
-        addWorkoutLayout = new AddWorkoutLayout();
+        addWorkoutFragment = new AddWorkoutFragment();
         fragment4 = new Fragment4();
         fragment5 = new Fragment5();
 
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     changeScreen(notebookfragment);
                     break;
                 case R.id.item3:
-                    changeScreen(addWorkoutLayout);
+                    changeScreen(addWorkoutFragment);
                     break;
                 case R.id.item4:
                     changeScreen(fragment4);
@@ -257,4 +256,6 @@ public class MainActivity extends AppCompatActivity {
             register_request(values);
         }
     }
+
+
 }

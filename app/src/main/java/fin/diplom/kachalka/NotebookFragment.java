@@ -68,7 +68,7 @@ public class NotebookFragment extends Fragment  {
 
     public void fill_workouts(View view, JSONObject response){
 
-        System.out.println(response);
+//        System.out.println(response);
         ArrayList workouts = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("workouts");
 
 
