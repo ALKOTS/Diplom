@@ -17,10 +17,10 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,10 +47,7 @@ public class MainActivity extends AppCompatActivity {
     static String authToken = "";
     static String basic_url = "http://10.0.2.2:1488/pract/";
     LinearLayout registerLayout;
-
-//    public static Context getAppContext() {
-//        return ctx;
-//    }
+    static Response.ErrorListener errorListener;
 
     public static void handle_response(int error_code){
         String response_text;
@@ -66,8 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 response_text = "Error code: "+ error_code;
                 break;
         }
-        Toast.makeText(ctx,
-                response_text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(ctx, response_text, Toast.LENGTH_SHORT).show();
     }
 
     public void register_request(JSONObject credentials){
@@ -77,24 +73,21 @@ public class MainActivity extends AppCompatActivity {
 
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, credentials, response -> {
             try {
-//                System.out.println(response);
                 if(response.getString("response").equals("Success")){
                     login_request(credentials.getString("login"), credentials.getString("password"));
                 }else{
-//                    new Gson().fromJson((JsonElement) response.get("Errors"), HashMap.class);
                     Map errors = ((Map)new Gson().fromJson(String.valueOf(response), HashMap.class).get("Errors"));
                     for (Object error: errors.keySet()){
                         Toast.makeText(ctx,errors.get(error).toString(), Toast.LENGTH_LONG).show();
                     }
 
                 }
-//                login_request(credentials.getString("login"), credentials.getString("password"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
-        }, error -> handle_response(error.networkResponse.statusCode));
+        }, errorListener);
 
         queue.add(jor);
 
@@ -114,14 +107,13 @@ public class MainActivity extends AppCompatActivity {
             try {
                 authToken = response.getString("token");
                 ctx.getSharedPreferences("AuthPrefs", MODE_PRIVATE).edit().putString("authToken", authToken).apply();
-//                System.out.println(authToken);
                 startApp();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
-        }, error -> handle_response(error.networkResponse.statusCode));
+        }, errorListener);
 
         queue.add(jor);
     }
@@ -135,13 +127,13 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (objects != null) {
                     fill_view.invoke(obj, view, response, objects);
-                }else {
+                } else {
                     fill_view.invoke(obj, view, response);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, error -> handle_response(error.networkResponse.statusCode)){
+        }, errorListener){
             @Override
             public Map<String,String> getHeaders(){
                 return new HashMap<String, String>(){{
@@ -199,14 +191,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        getSupportActionBar().hide();
         loginLayout =findViewById(R.id.login_layout);
         mainLayout=findViewById(R.id.main_layout);
         registerLayout= findViewById(R.id.register_layout);
         registerLayout.setVisibility(View.GONE);
         loginLayout.setVisibility(View.GONE);
         ctx = getApplicationContext();
+
+        errorListener = error -> {
+            if(error.networkResponse==null){
+                Toast.makeText(ctx,"Servers may be down", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            handle_response(error.networkResponse.statusCode);
+
+        };
 
         authToken = this.getSharedPreferences("AuthPrefs", MODE_PRIVATE).getString("authToken", null);
 
@@ -256,10 +256,5 @@ public class MainActivity extends AppCompatActivity {
             }};
             register_request(values);
         }
-
-
-
-
-
     }
 }
