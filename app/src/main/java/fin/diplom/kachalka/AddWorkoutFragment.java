@@ -18,19 +18,14 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,11 +40,11 @@ import java.util.concurrent.atomic.AtomicReference;
 class StatsOnClickListener implements View.OnClickListener
 {
 
-    Object exercise;
+    int exerciseIndex;
     String who;
 
-    public StatsOnClickListener(Object exercise, String who) {
-        this.exercise=exercise;
+    public StatsOnClickListener(int exerciseIndex, String who) {
+        this.exerciseIndex=exerciseIndex;
         this.who=who;
     }
 
@@ -64,17 +59,17 @@ class StatsOnClickListener implements View.OnClickListener
             requestFocus();
             setOnFocusChangeListener((v1, hasFocus) -> {
                 if(!hasFocus){
-                    if(AddWorkoutFragment.exerciseStats.get(exercise)==null){
-                        AddWorkoutFragment.exerciseStats.put(exercise,new HashMap<>());
-                    }
+//                    if(AddWorkoutFragment.exercisesStats.get(exerciseIndex)==null){
+//                        AddWorkoutFragment.exercisesStats.add(new HashMap<>());
+//                    }
                     if(!((EditText) v1).getText().toString().equals("")){
                         ((TextView) view12).setText(((EditText) v1).getText());
 
-                        ((HashMap)AddWorkoutFragment.exerciseStats.get(exercise)).put(who, ((EditText) v1).getText());
+                        ((HashMap)AddWorkoutFragment.exercisesStats.get(exerciseIndex)).put(who, ((EditText) v1).getText());
 
                     }else{
-                        AddWorkoutFragment.exerciseStats.put(exercise, new HashMap(){{
-                            ((HashMap)AddWorkoutFragment.exerciseStats.get(exercise)).put(who, 0);
+                        AddWorkoutFragment.exercisesStats.add(new HashMap(){{
+                            ((HashMap)AddWorkoutFragment.exercisesStats.get(exerciseIndex)).put(who, 0);
                         }});
                     }
 
@@ -89,13 +84,14 @@ class StatsOnClickListener implements View.OnClickListener
 public class AddWorkoutFragment extends Fragment {
     CalendarView calendar;
     AddWorkoutFragment adf;
-    LinearLayout exerciseList;
-    LinearLayout selectedExercisesView;
-    ArrayList exercises;
+    LinearLayout allExercisesView;
+    LinearLayout exercisesView;
+    ArrayList receivedExercises;
     ArrayList<Object> exercisesToAdd;
-    ArrayList<Object> addedExercises;
-    HashMap<String,LinearLayout> drawnExercises;
-    static HashMap<Object, Object> exerciseStats;
+    ArrayList<Object> exercisesObjects;
+    HashMap<String,LinearLayout> exerciseSuggestionsViews;
+//    static HashMap<Object, Object> exerciseStats;
+    static ArrayList<HashMap<String, String>> exercisesStats;
 
     public AddWorkoutFragment() {
     }
@@ -177,13 +173,12 @@ public class AddWorkoutFragment extends Fragment {
     }
 
     public void fillExercises(View view, JSONObject response){
-        exercises = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("exercises");
+        receivedExercises = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("exercises");
 
         exercisesToAdd = new ArrayList<>();
 
-
-        drawnExercises = new HashMap<>();
-        for(Object exercise:exercises){
+        exerciseSuggestionsViews = new HashMap<>();
+        for(Object exercise: receivedExercises){
 //            System.out.println(exercise);
             ArrayList<String> tags = new ArrayList<>();
 
@@ -200,7 +195,6 @@ public class AddWorkoutFragment extends Fragment {
             LinearLayout exerciseToDraw = drawExercises(view, (Map)exercise);
             LinearLayout tagsLayout = (LinearLayout) ((LinearLayout) exerciseToDraw.getChildAt(0)).getChildAt(1);
 
-
             for(String tag:tags){
                 tagsLayout.addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
                     setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
@@ -212,8 +206,8 @@ public class AddWorkoutFragment extends Fragment {
                 }});
             }
 
-            exerciseList.addView(exerciseToDraw);
-            drawnExercises.put(String.valueOf(((Map)exercise).get("name")), exerciseToDraw);
+            allExercisesView.addView(exerciseToDraw);
+            exerciseSuggestionsViews.put(String.valueOf(((Map)exercise).get("name")), exerciseToDraw);
         }
     }
 
@@ -231,14 +225,16 @@ public class AddWorkoutFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)  {
+        System.out.println("ss");
         TextView date_picker = view.findViewById(R.id.dateView);
         TextView startTimePicker = view.findViewById(R.id.startTime);
         TextView endTimePicker = view.findViewById(R.id.endTime);
         FrameLayout exerciseListLayout = view.findViewById(R.id.exerciseListLayout);
-        exerciseList = view.findViewById(R.id.exerciseList);
-        selectedExercisesView = view.findViewById(R.id.selectedExercisesView);
-        exerciseStats = new HashMap<>();
+        allExercisesView = view.findViewById(R.id.exerciseList);
+        exercisesView = view.findViewById(R.id.selectedExercisesView);
+        exercisesStats = new ArrayList<>();
 
+        ((EditText) view.findViewById(R.id.workoutName)).setText("");
         exerciseListLayout.setVisibility(View.GONE);
         ArrayList<String> current_date = new ArrayList<>(Arrays.asList(new SimpleDateFormat("dd/MM/yyyy/HH/mm").format(new Date()).split("/")));
         date_picker.setText(String.format("%s %s %s", current_date.get(0), getResources().getStringArray(R.array.months_list)[Integer.parseInt(current_date.get(1))-1], current_date.get(2)));
@@ -274,7 +270,7 @@ public class AddWorkoutFragment extends Fragment {
                                 + getResources().getStringArray(R.array.months_list)[month] + " " + year;
 
                         date_picker.setText(Date);
-                        dateData.set(String.format("%s %s %s", year, month, day));
+                        dateData.set(String.format("%s %s %s", year, month+1, day));
                         ((LinearLayout)vv.getParent()).removeView(vv);
                     });
 
@@ -290,19 +286,19 @@ public class AddWorkoutFragment extends Fragment {
 
         view.findViewById(R.id.exerciseListBackBtn).setOnClickListener(v -> {
             exerciseListLayout.setVisibility(View.GONE);
-            exerciseList.removeAllViews();
+            allExercisesView.removeAllViews();
             exercisesToAdd.clear();
         });
 
         view.findViewById(R.id.acceptExercisesBtn).setOnClickListener(v -> {
             exerciseListLayout.setVisibility(View.GONE);
-            exerciseList.removeAllViews();
-            selectedExercisesView.removeAllViews();
+            allExercisesView.removeAllViews();
+            exercisesView.removeAllViews();
 
-            if(addedExercises==null){
-                addedExercises = new ArrayList<>(exercisesToAdd);
+            if(exercisesObjects ==null){
+                exercisesObjects = new ArrayList<>(exercisesToAdd);
             }else{
-                addedExercises.addAll(exercisesToAdd);
+                exercisesObjects.addAll(exercisesToAdd);
             }
 
 
@@ -326,43 +322,44 @@ public class AddWorkoutFragment extends Fragment {
 //                }});
 //            };
 
-            for(Object exercise:addedExercises){
-                if(exerciseStats.get(exercise)==null){
-                    exerciseStats.put(exercise, new HashMap(){{
+//            for(Object exercise: exercisesObjects){
+            for(int i=0; i<exercisesObjects.size(); i++){
+                Object exercise = exercisesObjects.get(i);
+                if(exercisesStats.size()<=i){
+                    exercisesStats.add(new HashMap(){{
                         put("w",0);
                         put("r",0);
                     }});
                 }
 
+                System.out.println(exercisesStats);
+
+                int finalI = i;
                 TextView weightView = new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
                     setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                         weight = 1.0f;
                     }});
-                    setText(((Map)exerciseStats.get(exercise)).get("w").toString());
+                    setText(((Map)exercisesStats.get(finalI)).get("w").toString());
 
-                    setOnClickListener(new StatsOnClickListener(exercise, "w"));
+                    setOnClickListener(new StatsOnClickListener(finalI, "w"));
                 }};
 
                 TextView repsView = new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
                     setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
                         weight = 1.0f;
                     }});
-                    setText(((Map)exerciseStats.get(exercise)).get("r").toString());
-                    setOnClickListener(new StatsOnClickListener(exercise, "r"));
+                    setText(((Map)exercisesStats.get(finalI)).get("r").toString());
+                    setOnClickListener(new StatsOnClickListener(finalI, "r"));
                 }};
 
                 LinearLayout drawnExercise = drawExercises(view, (Map)exercise);
                 drawnExercise.removeViewAt(1);
                 drawnExercise.setOnClickListener(null);
 
-                selectedExercisesView.addView(drawnExercise);
+                exercisesView.addView(drawnExercise);
 
                 LinearLayout controlsLayout = (LinearLayout) ((LinearLayout) drawnExercise.getChildAt(0)).getChildAt(1);
                 controlsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-
-
-
 
                 controlsLayout.addView(new LinearLayout(view.getContext()){{
                     setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
@@ -406,9 +403,10 @@ public class AddWorkoutFragment extends Fragment {
                         setText("Delete");
 
                         setOnClickListener(view13 -> {
-                            addedExercises.remove(exercise);
-                            selectedExercisesView.removeView(drawnExercise);
-                            exerciseStats.remove(exercise);
+
+                            exercisesObjects.remove(exercisesView.indexOfChild(drawnExercise));
+                            exercisesStats.remove(exercisesView.indexOfChild(drawnExercise));
+                            exercisesView.removeView(drawnExercise);
                         });
                     }});
                 }});
@@ -423,14 +421,14 @@ public class AddWorkoutFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if(drawnExercises==null){
+                if(exerciseSuggestionsViews ==null){
                     return;
                 }
-                for(String exName:drawnExercises.keySet()){
+                for(String exName: exerciseSuggestionsViews.keySet()){
                     if(!exName.toLowerCase(Locale.ROOT).contains(charSequence.toString().toLowerCase(Locale.ROOT))){
-                        drawnExercises.get(exName).setVisibility(View.GONE);
+                        exerciseSuggestionsViews.get(exName).setVisibility(View.GONE);
                     }else {
-                        drawnExercises.get(exName).setVisibility(View.VISIBLE);
+                        exerciseSuggestionsViews.get(exName).setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -447,18 +445,27 @@ public class AddWorkoutFragment extends Fragment {
             if(((EditText) view.findViewById(R.id.workoutName)).getText().toString().equals("")){
                 ((EditText) view.findViewById(R.id.workoutName)).setText("Workout");
             }
+
+            int length = 0;
+            if(Integer.parseInt(startTime.get(1))*60+Integer.parseInt(startTime.get(0))*3600>Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600){
+                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600+24*3600;
+            }else{
+                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600;
+            }
+
+            int finalLength = length;
             HashMap workoutData = new HashMap(){{
                 try {
                     put("name",((EditText)view.findViewById(R.id.workoutName)).getText().toString());
                     put("date", dateData);
-                    put("length", String.valueOf(Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600-Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600));
+                    put("length", String.valueOf(finalLength));
                     put("exercises", new ArrayList(){{
-                        for(int i = 0; i<addedExercises.size(); i++){
+                        for(int i = 0; i < exercisesObjects.size(); i++){
                             int finalI = i;
                             add(new HashMap(){{
-                                put("activity",((Map)addedExercises.get(finalI)).get("id"));
-                                put("weight",((Map)exerciseStats.get(addedExercises.get(finalI))).get("w").toString()); //selectedExercisesView
-                                put("reps",((Map)exerciseStats.get(addedExercises.get(finalI))).get("r").toString());
+                                put("activity",((Map) exercisesObjects.get(finalI)).get("id"));
+                                put("weight",String.valueOf(exercisesStats.get(finalI).get("w")));
+                                put("reps",String.valueOf(exercisesStats.get(finalI).get("r")));
                             }});
                         }
                     }});
@@ -466,6 +473,7 @@ public class AddWorkoutFragment extends Fragment {
                     e.printStackTrace();
                 }
             }};
+            exercisesObjects.clear();
 
             JSONObject requestData = new JSONObject(workoutData);
 //            System.out.println(workoutData);
