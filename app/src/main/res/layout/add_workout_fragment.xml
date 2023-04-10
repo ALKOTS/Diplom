@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity=""
+
     tools:context=".AddWorkoutFragment">
 
-<!--    <CalendarView-->
-<!--        android:id="@+id/calendarView2"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="center"/>-->
+    <!--    <CalendarView-->
+    <!--        android:id="@+id/calendarView2"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="center"/>-->
 
     <ScrollView
         android:layout_width="match_parent"
@@ -22,14 +23,6 @@
             android:layout_margin="10dp"
             android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/editTextTextPersonName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Workout name"
-                android:inputType="textPersonName" />
-
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="match_parent"
@@ -37,6 +30,15 @@
                 android:paddingBottom="5dp"
                 android:text="Create workout"
                 android:textSize="32dp" />
+
+            <EditText
+                android:id="@+id/workoutName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Workout name"
+                android:maxLength="20"
+                android:inputType="textPersonName" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -91,19 +93,21 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/selectedExercisesView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/addExerciseBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+"/>
             </LinearLayout>
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/addExerciseBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+" />
+
+            <Button
+                android:id="@+id/commitBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Accept" />
@@ -113,17 +117,16 @@
     </ScrollView>
 
     <FrameLayout
+        android:id="@+id/exerciseListLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/exerciseListLayout"
+        android:background="@drawable/shade"
         android:elevation="5dp"
-        android:paddingRight="10dp"
         android:paddingLeft="10dp"
         android:paddingTop="50dp"
-        android:paddingBottom="50dp"
-        android:background="@drawable/shade"
-        >
-
+        android:paddingRight="10dp"
+        android:paddingBottom="50dp">
+<!--        android:visibility="2"-->
 
         <ScrollView
             android:layout_width="match_parent"
@@ -131,11 +134,53 @@
             android:background="@color/white">
 
             <LinearLayout
-                android:id="@+id/exerciseList"
+
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
 
-                android:orientation="vertical"/>
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/navList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/exerciseListBackBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Back" />
+
+                        <Button
+                            android:id="@+id/acceptExercisesBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Accept" />
+                        <!--                            android:layout_gravity="end"-->
+
+                    </LinearLayout>
+
+
+                    <EditText
+                        android:id="@+id/exerciseSearchInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Search for exercises" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/exerciseList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"></LinearLayout>
+            </LinearLayout>
         </ScrollView>
     </FrameLayout>
 

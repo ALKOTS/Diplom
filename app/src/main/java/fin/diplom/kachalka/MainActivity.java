@@ -8,8 +8,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -117,6 +120,40 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
+    public static void postWorkout_request(View view, JSONObject workoutData){
+        String url = basic_url + "add_workout/";
+
+        RequestQueue queue = Volley.newRequestQueue(view.getContext());
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, workoutData, response -> {
+            try {
+                System.out.println(response);
+//                if(response.getString("response").equals("Success")){
+//                    login_request(credentials.getString("login"), credentials.getString("password"));
+//                }else{
+//                    Map errors = ((Map)new Gson().fromJson(String.valueOf(response), HashMap.class).get("Errors"));
+//                    for (Object error: errors.keySet()){
+//                        Toast.makeText(ctx,errors.get(error).toString(), Toast.LENGTH_LONG).show();
+//                    }
+//
+//                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }, errorListener){
+            @Override
+            public Map<String,String> getHeaders(){
+                return new HashMap<String, String>(){{
+                    put("Authorization", "Token "+authToken);
+                }};
+            }
+        };
+
+        queue.add(jor);
+    }
+
     public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects){
         String url = basic_url+last_url;
 
@@ -183,6 +220,23 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    @Override //removes focus on touch
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent( event );
     }
 
     @Override
