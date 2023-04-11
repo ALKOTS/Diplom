@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -68,7 +70,6 @@ public class NotebookFragment extends Fragment  {
 
     public void fill_workouts(View view, JSONObject response){
 
-//        System.out.println(response);
         ArrayList workouts = (ArrayList) new Gson().fromJson(String.valueOf(response), HashMap.class).get("workouts");
 
 
@@ -83,8 +84,7 @@ public class NotebookFragment extends Fragment  {
         for(Integer day:days.keySet()){
             workouts_layout.addView(new LinearLayout(view.getContext()){{
                 setOrientation(LinearLayout.VERTICAL);
-                setBackground(getResources().getDrawable(R.drawable.border));
-
+                setBackground(ContextCompat.getDrawable(getActivity(),R.drawable.border));
 
                 setLayoutParams(new MarginLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)){{
                     setMargins(5,5,5,5);
@@ -96,104 +96,36 @@ public class NotebookFragment extends Fragment  {
 
     public void draw_workouts(View view, ArrayList<Map> workout_day, LinearLayout workouts_layout){
         for(Map workout:workout_day){
+            LinearLayout l = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.workout_day_layout, null, false);
+            ((TextView)l.getChildAt(0)).setText((String)workout.get("name"));
+            ((TextView)l.getChildAt(1)).setText(workout.get("day")+ ", "+getResources().getStringArray(R.array.months_list)[((Double)workout.get("month")).intValue()-1]);
 
-            LinearLayout l = new LinearLayout(view.getContext()){{
-                setOrientation(LinearLayout.VERTICAL);
-                setPadding(10,10,10,10);
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            LinearLayout miscInfo = (LinearLayout) l.getChildAt(2);
+            ((TextView)miscInfo.getChildAt(1)).setText(new DecimalFormat("#.00").format(Float.parseFloat(String.valueOf(workout.get("length"))) / 60 / 60));
 
-                addView(new AppCompatTextView(view.getContext()){{
-                    setPadding(0,0,0,15);
+            LinearLayout exercisesInfo = (LinearLayout) l.getChildAt(3);
 
-                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    setText((String)workout.get("name"));
-                }});
-
-                addView(new AppCompatTextView(view.getContext()){{
-                    setPadding(0,0,0,10);
-                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    setText(workout.get("day")+ ", "+getResources().getStringArray(R.array.months_list)[((Double)workout.get("month")).intValue()-1]);
-                }});
-
-                addView(new LinearLayout(view.getContext()){{
-
-                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            for(Object ex:(ArrayList)workout.get("exercises")){
+                Map x = (Map)ex;
+                exercisesInfo.addView(new LinearLayout(view.getContext()){{
+                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                     setOrientation(LinearLayout.HORIZONTAL);
-                    setPadding(0,0,0,10);
 
-                    addView(new androidx.appcompat.widget.AppCompatImageView(view.getContext()){{
-
-                        setImageResource(R.drawable.time);
-                    }});
                     addView(new AppCompatTextView(view.getContext()){{
-                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
+                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                             weight = 1.0f;
                         }});
-                        setText( String.valueOf(new DecimalFormat("#.00").format( Float.parseFloat(String.valueOf(workout.get("length")))/60/60 )) );
+                        setText((String) ((Map)x.get("activity")).get("name"));
                     }});
 
                     addView(new AppCompatTextView(view.getContext()){{
-                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
+                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                             weight = 1.0f;
                         }});
-                        setText("TODO total weight");
-                    }});
-
-                    addView(new AppCompatTextView(view.getContext()){{
-                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                            weight = 1.0f;
-                        }});
-                        setText(String.valueOf(workout.get("personal_highscores_amount")));
+                        setText(x.get("weight")+"kg x "+x.get("reps"));
                     }});
                 }});
-
-                addView(new LinearLayout(view.getContext()){{
-                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    setOrientation(LinearLayout.VERTICAL);
-
-                    addView(new LinearLayout(view.getContext()){{
-                        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                        setOrientation(LinearLayout.HORIZONTAL);
-
-                        addView(new AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                                weight = 1.0f;
-                            }});
-                            setText("Exercise");
-                        }});
-                        addView(new AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                                weight = 1.0f;
-                            }});
-                            setText("Sets");
-                        }});
-                    }});
-
-                    for(Object ex:(ArrayList)workout.get("exercises")){
-                        Map x = (Map)ex;
-                        addView(new LinearLayout(view.getContext()){{
-                            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                            setOrientation(LinearLayout.HORIZONTAL);
-
-                            addView(new AppCompatTextView(view.getContext()){{
-                                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                                    weight = 1.0f;
-                                }});
-                                setText((String) ((Map)x.get("activity")).get("name"));
-                            }});
-
-                            addView(new AppCompatTextView(view.getContext()){{
-                                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                                    weight = 1.0f;
-                                }});
-                                setText(x.get("weight")+"kg x "+x.get("reps"));
-                            }});
-                        }});
-                    }
-
-                }});
-            }};
-
+            }
             ((LinearLayout)workouts_layout.getChildAt(workouts_layout.getChildCount()-1)).addView(l);
 
         }

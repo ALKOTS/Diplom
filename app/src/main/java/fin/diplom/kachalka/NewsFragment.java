@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
@@ -64,49 +65,20 @@ public class NewsFragment extends Fragment {
     public NewsFragment() {
     }
 
-    public static  LinearLayout draw_post(View view, Object post, Boolean forMenu){
+    public static LinearLayout draw_post(View view, Object post, Boolean forMenu){
         String text = ((String)((Map)post).get("text")).length()>50?((String)((Map)post).get("text")).substring(0,80)+"...":((String)((Map)post).get("text"));
+        String date = ((String)((Map)post).get("date"));
+        date = date.split("-")[2]+ " "+view.getResources().getStringArray(R.array.months_list)[Integer.parseInt(date.split("-")[1])-1]+" "+date.split("-")[0];
         if(!forMenu){
             text = (String)((Map)post).get("text");
         }
-        String finalText = text;
+        LinearLayout postLayout = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.post_layout, null, false);
 
+        ((TextView)postLayout.getChildAt(0)).setText(date);
+        ((TextView)postLayout.getChildAt(1)).setText((String)((Map)post).get("title"));
+        ((TextView)postLayout.getChildAt(2)).setText((String)((Map)post).get("sub_title"));
+        ((TextView)postLayout.getChildAt(3)).setText((String)((Map)post).get(text));
 
-        LinearLayout postLayout = new LinearLayout(view.getContext()){{
-            setOrientation(LinearLayout.VERTICAL);
-            setPadding(20,10,20,10);
-            setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-            addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                setPadding(0,0,0,10);
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                setText((String)((Map)post).get("date"));
-                setTextSize(15);
-            }});
-            addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                setPadding(0,0,0,10);
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                setText((String)((Map)post).get("title"));
-                setTextSize(40);
-            }});
-            addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                setPadding(0,0,0,10);
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                setText((String)((Map)post).get("sub_title"));
-                setTextSize(25);
-            }});
-            addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                setPadding(0,0,0,10);
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                setText(finalText);
-                setTextSize(17);
-            }});
-            addView(new androidx.appcompat.widget.AppCompatImageView(view.getContext()){{
-                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                setGravity(Gravity.END);
-                setImageResource(R.drawable.arrow);
-            }});
-        }};
         return postLayout;
     }
 

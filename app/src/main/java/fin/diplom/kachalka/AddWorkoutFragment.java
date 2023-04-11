@@ -13,6 +13,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -59,9 +60,6 @@ class StatsOnClickListener implements View.OnClickListener
             requestFocus();
             setOnFocusChangeListener((v1, hasFocus) -> {
                 if(!hasFocus){
-//                    if(AddWorkoutFragment.exercisesStats.get(exerciseIndex)==null){
-//                        AddWorkoutFragment.exercisesStats.add(new HashMap<>());
-//                    }
                     if(!((EditText) v1).getText().toString().equals("")){
                         ((TextView) view12).setText(((EditText) v1).getText());
 
@@ -90,7 +88,6 @@ public class AddWorkoutFragment extends Fragment {
     ArrayList<Object> exercisesToAdd;
     ArrayList<Object> exercisesObjects;
     HashMap<String,LinearLayout> exerciseSuggestionsViews;
-//    static HashMap<Object, Object> exerciseStats;
     static ArrayList<HashMap<String, String>> exercisesStats;
 
     public AddWorkoutFragment() {
@@ -126,50 +123,19 @@ public class AddWorkoutFragment extends Fragment {
     }
 
     public LinearLayout drawExercises(View view, Map exercise){
-        return new LinearLayout(view.getContext()){{
-            setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                weight = 1.0f;
-            }});
-            setPadding(10,10,10,0);
-            setOrientation(HORIZONTAL);
-            addView(new LinearLayout(view.getContext()){{
-                setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                    weight = 1.0f;
-                }});
-                setOrientation(VERTICAL);
-                addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                    setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                        weight = 1.0f;
-                    }});
-                    setText(String.valueOf(exercise.get("name")));
-                    setTextSize(20);
-                }});
-                addView(new LinearLayout(view.getContext()){{
-                    setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT) {{
-                        weight = 1.0f;
-                    }});
-                    setOrientation(HORIZONTAL);
-                }});
-            }});
-            addView(new androidx.appcompat.widget.AppCompatCheckBox(view.getContext()){{
-                setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                    weight = 1.0f;
-                }});
-                setText("");
-                setGravity(Gravity.END);
-                setLayoutDirection(LAYOUT_DIRECTION_RTL);
-            }});
-            setOnClickListener(view1 -> {
-                if(((CheckBox)getChildAt(1)).isChecked()) {
-                    ((CheckBox) getChildAt(1)).setChecked(false);
-                    exercisesToAdd.remove(exercise);
-                    return;
-                }
-                ((CheckBox)getChildAt(1)).setChecked(true);
-                exercisesToAdd.add(exercise);
 
-            });
-        }};
+        LinearLayout drawnExerciseLayout=(LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.drawn_exercise_layout, null, false);;
+        ((TextView)((LinearLayout) drawnExerciseLayout.getChildAt(0)).getChildAt(0)).setText(String.valueOf(exercise.get("name")));
+        drawnExerciseLayout.setOnClickListener(view1 -> {
+            if(((CheckBox)drawnExerciseLayout.getChildAt(1)).isChecked()) {
+                ((CheckBox)drawnExerciseLayout.getChildAt(1)).setChecked(false);
+                exercisesToAdd.remove(exercise);
+                return;
+            }
+            ((CheckBox)drawnExerciseLayout.getChildAt(1)).setChecked(true);
+            exercisesToAdd.add(exercise);
+        });
+        return  drawnExerciseLayout;
     }
 
     public void fillExercises(View view, JSONObject response){
@@ -179,7 +145,6 @@ public class AddWorkoutFragment extends Fragment {
 
         exerciseSuggestionsViews = new HashMap<>();
         for(Object exercise: receivedExercises){
-//            System.out.println(exercise);
             ArrayList<String> tags = new ArrayList<>();
 
             for(Object tag:((Map)exercise).keySet()){
@@ -193,7 +158,10 @@ public class AddWorkoutFragment extends Fragment {
                 }
             }
             LinearLayout exerciseToDraw = drawExercises(view, (Map)exercise);
-            LinearLayout tagsLayout = (LinearLayout) ((LinearLayout) exerciseToDraw.getChildAt(0)).getChildAt(1);
+            LinearLayout tagsLayout = new LinearLayout(view.getContext()){{
+                setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                setOrientation(HORIZONTAL);
+            }};
 
             for(String tag:tags){
                 tagsLayout.addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
@@ -205,7 +173,7 @@ public class AddWorkoutFragment extends Fragment {
                     setTextSize(16);
                 }});
             }
-
+            ((LinearLayout) exerciseToDraw.getChildAt(0)).addView(tagsLayout);
             allExercisesView.addView(exerciseToDraw);
             exerciseSuggestionsViews.put(String.valueOf(((Map)exercise).get("name")), exerciseToDraw);
         }
@@ -300,29 +268,6 @@ public class AddWorkoutFragment extends Fragment {
             }else{
                 exercisesObjects.addAll(exercisesToAdd);
             }
-
-
-//            View.OnClickListener onEditViewClick = view12 -> {
-//                LinearLayout parent = (LinearLayout) view12.getParent();
-//                view12.setVisibility(View.GONE);
-//                parent.addView(new androidx.appcompat.widget.AppCompatEditText(view12.getContext()){{
-//                    setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//                    setInputType(InputType.TYPE_CLASS_NUMBER);
-//                    requestFocus();
-//                    setOnFocusChangeListener((v1, hasFocus) -> {
-//                        if(!hasFocus){
-//                            if(!((EditText) v1).getText().toString().equals("")){
-//                                ((TextView) view12).setText(((EditText) v1).getText());
-//                            }
-//
-//                            view12.setVisibility(VISIBLE);
-//                            parent.removeViewAt(2);
-//                        }
-//                    });
-//                }});
-//            };
-
-//            for(Object exercise: exercisesObjects){
             for(int i=0; i<exercisesObjects.size(); i++){
                 Object exercise = exercisesObjects.get(i);
                 if(exercisesStats.size()<=i){
@@ -358,58 +303,17 @@ public class AddWorkoutFragment extends Fragment {
 
                 exercisesView.addView(drawnExercise);
 
-                LinearLayout controlsLayout = (LinearLayout) ((LinearLayout) drawnExercise.getChildAt(0)).getChildAt(1);
-                controlsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                LinearLayout controlsLayout = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.exercise_controls_layout, null, false);
+                ((LinearLayout)controlsLayout.getChildAt(0)).addView(weightView);
+                ((LinearLayout)controlsLayout.getChildAt(1)).addView(repsView);
+                controlsLayout.getChildAt(2).setOnClickListener(view12 -> {
+                    exercisesObjects.remove(exercisesView.indexOfChild(drawnExercise));
+                    exercisesStats.remove(exercisesView.indexOfChild(drawnExercise));
+                    exercisesView.removeView(drawnExercise);
+                });
 
-                controlsLayout.addView(new LinearLayout(view.getContext()){{
-                    setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                        weight = 1.0f;
-                    }});
-                    setOrientation(HORIZONTAL);
-                    addView(new LinearLayout(view.getContext()){{
-                        setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                            weight = 1.0f;
-                        }});
-                        setOrientation(VERTICAL);
+                ((LinearLayout) drawnExercise.getChildAt(0)).addView(controlsLayout);
 
-                        addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                                weight = 1.0f;
-                            }});
-                            setText("Weight");
-                        }});
-
-                        addView(weightView);
-                    }});
-                    addView(new LinearLayout(view.getContext()){{
-                        setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                            weight = 1.0f;
-                        }});
-                        setOrientation(VERTICAL);
-
-                        addView(new androidx.appcompat.widget.AppCompatTextView(view.getContext()){{
-                            setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT){{
-                                weight = 1.0f;
-                            }});
-                            setText("Reps");
-                        }});
-
-                        addView(repsView);
-                    }});
-                    addView(new androidx.appcompat.widget.AppCompatButton(view.getContext()){{
-                        setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
-                            weight = 1.0f;
-                        }});
-                        setText("Delete");
-
-                        setOnClickListener(view13 -> {
-
-                            exercisesObjects.remove(exercisesView.indexOfChild(drawnExercise));
-                            exercisesStats.remove(exercisesView.indexOfChild(drawnExercise));
-                            exercisesView.removeView(drawnExercise);
-                        });
-                    }});
-                }});
             }
         });
 

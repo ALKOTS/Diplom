@@ -128,15 +128,7 @@ public class MainActivity extends AppCompatActivity {
         JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, workoutData, response -> {
             try {
                 System.out.println(response);
-//                if(response.getString("response").equals("Success")){
-//                    login_request(credentials.getString("login"), credentials.getString("password"));
-//                }else{
-//                    Map errors = ((Map)new Gson().fromJson(String.valueOf(response), HashMap.class).get("Errors"));
-//                    for (Object error: errors.keySet()){
-//                        Toast.makeText(ctx,errors.get(error).toString(), Toast.LENGTH_LONG).show();
-//                    }
-//
-//                }
+                Toast.makeText(view.getContext(), "Success", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
