@@ -108,9 +108,8 @@ public class NewsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        Method fill_news = null;
         AtomicInteger lastBottom = new AtomicInteger();
+        Method fill_news = null;
 
         try {
             fill_news = NewsFragment.class.getMethod("fill_news", View.class, JSONObject.class);
@@ -122,14 +121,14 @@ public class NewsFragment extends Fragment {
 
         Method finalFill_news = fill_news;
 
-        MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null);
+        MainActivity.get_request(nf, "return_news/"+news_drawn, view, fill_news, null,null);
 
         newsFeedContainer.getViewTreeObserver()
                 .addOnScrollChangedListener(() -> {
                     if ((newsFeedContainer.getChildAt(0).getBottom() <= (newsFeedContainer.getHeight() + newsFeedContainer.getScrollY())) && newsFeedContainer.getChildAt(0).getBottom()> lastBottom.get()) {
                         news_drawn+=10;
                         lastBottom.set(newsFeedContainer.getChildAt(0).getBottom());
-                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null);
+                        MainActivity.get_request(nf, "return_news/" + news_drawn, view, finalFill_news, null,null);
                     }
                 });
     }

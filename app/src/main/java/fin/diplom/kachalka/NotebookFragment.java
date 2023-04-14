@@ -184,7 +184,7 @@ public class NotebookFragment extends Fragment  {
         month_spinner = view.findViewById(R.id.month_spinner);
         workouts_layout = view.findViewById(R.id.workouts_layout);
 
-        MainActivity.get_request(nf, "return_workout_years", view, fill_year_spinner, new ArrayList<Object>(){{add(year_spinner);}});
+        MainActivity.get_request(nf, "return_workout_years", view, fill_year_spinner, new ArrayList<Object>(){{add(year_spinner);}},null);
 
         year_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -196,7 +196,7 @@ public class NotebookFragment extends Fragment  {
                     e.printStackTrace();
                 }
 
-                MainActivity.get_request(nf, "return_workout_months/"+years.get(pos), view, fill_month_spinner, new ArrayList<Object>(){{add(month_spinner);}});
+                MainActivity.get_request(nf, "return_workout_months/"+years.get(pos), view, fill_month_spinner, new ArrayList<Object>(){{add(month_spinner);}},null);
             }
 
             @Override
@@ -218,7 +218,7 @@ public class NotebookFragment extends Fragment  {
                     e.printStackTrace();
                 }
 
-                MainActivity.get_request(nf, "return_workouts/"+year+"/"+month, view, fill_workouts, null);
+                MainActivity.get_request(nf, "return_workouts/"+year+"/"+month, view, fill_workouts, null, null);
             }
 
             @Override

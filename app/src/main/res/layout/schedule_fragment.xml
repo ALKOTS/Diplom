@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ScheduleFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Schedule"
+            android:textSize="40sp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id = "@+id/scheduleContainer">
+
+            <LinearLayout
+                android:id="@+id/timeTableLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+
+                <!--        <LinearLayout-->
+                <!--            android:layout_width="match_parent"-->
+                <!--            android:layout_height="match_parent"-->
+                <!--            android:orientation="vertical"-->
+                <!--            android:padding="10">-->
+
+                <!--            <TextView-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:text="15 April 2023"-->
+                <!--                android:textSize="20"/>-->
+
+                <!--            <LinearLayout-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="match_parent"-->
+                <!--                android:orientation="vertical"-->
+                <!--                android:padding="10">-->
+
+                <!--                <TextView-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:text="Karate"-->
+                <!--                    android:textSize="20"-->
+                <!--                    android:paddingBottom="5"/>-->
+
+                <!--                <LinearLayout-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="match_parent"-->
+                <!--                    android:orientation="horizontal"-->
+                <!--                    android:paddingBottom="5">-->
+
+                <!--                    <ImageView-->
+                <!--                        android:id="@+id/imageView2"-->
+                <!--                        android:layout_width="wrap_content"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:src="@drawable/time" />-->
+
+                <!--                    <TextView-->
+                <!--                        android:layout_width="wrap_content"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:text="15:30 - 16:30"-->
+                <!--                        android:layout_weight="1"-->
+                <!--                        android:textSize="15" />-->
+
+                <!--                    <ImageView-->
+                <!--                        android:id="@+id/imageView3"-->
+                <!--                        android:layout_width="wrap_content"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:src="@drawable/paid_only"-->
+                <!--                        android:layout_gravity="end"-->
+                <!--                        android:paddingRight="10"/>-->
+
+
+                <!--                </LinearLayout>-->
+
+                <!--                <TextView-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:text="Зал 1"-->
+                <!--                    android:textSize="15"-->
+                <!--                    android:paddingLeft="7"/>-->
+                <!--                <TextView-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:text="Andrew"-->
+                <!--                    android:textSize="15"-->
+                <!--                    android:paddingBottom=""-->
+                <!--                    android:paddingLeft="7"/>-->
+
+                <!--            </LinearLayout>-->
+                <!--        </LinearLayout>-->
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</FrameLayout>

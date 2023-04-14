@@ -222,7 +222,7 @@ public class AddWorkoutFragment extends Fragment {
         Method finalDrawExercises = drawExercises;
         view.findViewById(R.id.addExerciseBtn).setOnClickListener(view1 -> {
             exerciseListLayout.setVisibility(View.VISIBLE);
-            MainActivity.get_request(adf, "return_exercise_activities", view, finalDrawExercises, null);
+            MainActivity.get_request(adf, "return_exercise_activities", view, finalDrawExercises, null,null);
         });
         setPicker(startTimePicker, view);
         setPicker(endTimePicker, view);

@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     AddWorkoutFragment addWorkoutFragment;
     static ConstraintLayout mainLayout;
     static LinearLayout loginLayout;
-    Fragment4 fragment4;
+    ScheduleFragment scheduleFragment;
     Fragment5 fragment5;
     static String authToken = "";
     static String basic_url = "http://10.0.2.2:1488/pract/";
@@ -146,12 +146,17 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
-    public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects){
+    public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects, @Nullable JSONObject request_data){
         String url = basic_url+last_url;
 
         RequestQueue queue = Volley.newRequestQueue(view.getContext());
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.GET, url, null, response -> {
+        int method = Request.Method.GET;
+        if(request_data!=null){
+            method = Request.Method.POST;
+        }
+
+        JsonObjectRequest jor = new JsonObjectRequest(method, url, request_data, response -> {
             try {
                 if (objects != null) {
                     fill_view.invoke(obj, view, response, objects);
@@ -185,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
         newsfragment = new NewsFragment();
         notebookfragment = new NotebookFragment();
         addWorkoutFragment = new AddWorkoutFragment();
-        fragment4 = new Fragment4();
+        scheduleFragment = new ScheduleFragment();
         fragment5 = new Fragment5();
 
         Bundle notebook_bundle = new Bundle();
@@ -204,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                     changeScreen(addWorkoutFragment);
                     break;
                 case R.id.item4:
-                    changeScreen(fragment4);
+                    changeScreen(scheduleFragment);
                     break;
                 case R.id.item5:
                     changeScreen(fragment5);
