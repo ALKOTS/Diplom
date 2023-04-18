@@ -4,6 +4,6 @@
     <item android:id="@+id/news" android:title="News" android:icon="@drawable/news_svg"/>
     <item android:id="@+id/item2" android:title="Notebook" android:icon="@drawable/notebook_svg"/>
     <item android:id="@+id/item3" android:title="Add" android:icon="@drawable/add_svg"/>
-    <item android:id="@+id/item4" android:title="Item4" android:icon="@drawable/home_svg"/>
-    <item android:id="@+id/item5" android:title="Item5" android:icon="@drawable/home_svg"/>
+    <item android:id="@+id/item4" android:title="Schedule" android:icon="@drawable/schedule_svg"/>
+    <item android:id="@+id/item5" android:title="User profile" android:icon="@drawable/person_svg"/>
 </menu>

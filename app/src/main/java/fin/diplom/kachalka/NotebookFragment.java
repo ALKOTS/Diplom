@@ -1,5 +1,7 @@
 package fin.diplom.kachalka;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
 
@@ -21,10 +23,12 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -97,17 +101,17 @@ public class NotebookFragment extends Fragment  {
     public void draw_workouts(View view, ArrayList<Map> workout_day, LinearLayout workouts_layout){
         for(Map workout:workout_day){
             LinearLayout l = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.workout_day_layout, null, false);
-            ((TextView)l.getChildAt(0)).setText((String)workout.get("name"));
-            ((TextView)l.getChildAt(1)).setText(workout.get("day")+ ", "+getResources().getStringArray(R.array.months_list)[((Double)workout.get("month")).intValue()-1]);
+            ((TextView)l.findViewById(R.id.workoutNameView)).setText((String)workout.get("name"));
+            ((TextView)l.findViewById(R.id.workoutDateView)).setText(MessageFormat.format("{0}, {1}", workout.get("day"), getResources().getStringArray(R.array.months_list)[((Double) workout.get("month")).intValue() - 1]));
 
-            LinearLayout miscInfo = (LinearLayout) l.getChildAt(2);
-            ((TextView)miscInfo.getChildAt(1)).setText(new DecimalFormat("#.00").format(Float.parseFloat(String.valueOf(workout.get("length"))) / 60 / 60));
+//            LinearLayout miscInfo = (LinearLayout) l.getChildAt(2);
+            ((TextView)l.findViewById(R.id.workoutLengthView)).setText(String.format("%s - %s", ((String)workout.get("startTime")).substring(0,5), ((String)workout.get("endTime")).substring(0,5)));//new DecimalFormat("#.00").format(Float.parseFloat(String.valueOf(workout.get("length"))) / 60 / 60));
 
-            LinearLayout exercisesInfo = (LinearLayout) l.getChildAt(3);
+//            LinearLayout exercisesInfo = (LinearLayout) l.getChildAt(3);
 
             for(Object ex:(ArrayList)workout.get("exercises")){
                 Map x = (Map)ex;
-                exercisesInfo.addView(new LinearLayout(view.getContext()){{
+                ((LinearLayout)l.findViewById(R.id.workoutSetsView)).addView(new LinearLayout(view.getContext()){{
                     setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                     setOrientation(LinearLayout.HORIZONTAL);
 
@@ -122,10 +126,29 @@ public class NotebookFragment extends Fragment  {
                         setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT){{
                             weight = 1.0f;
                         }});
-                        setText(x.get("weight")+"kg x "+x.get("reps"));
+                        setText(String.format("%skg x %s", x.get("weight"), x.get("reps")));
                     }});
                 }});
             }
+            l.findViewById(R.id.deleteButton).setOnClickListener(view1 -> new AlertDialog.Builder(view1.getContext())
+                    .setTitle("Delete workout")
+                    .setMessage("Are you sure you want to delete this workout?")
+                    .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                        System.out.println(workout.get("id"));
+//                                    ((LinearLayout)workouts_layout.getChildAt(workouts_layout.getChildCount()-1)).removeView(l);
+                        l.setVisibility(View.GONE);
+                        try {
+                            MainActivity.removeWorkout_request(view1, new JSONObject().put("id",workout.get("id")));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    })
+
+                    // A null listener allows the button to dismiss the dialog and take no further action.
+                    .setNegativeButton(android.R.string.no, null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show());
             ((LinearLayout)workouts_layout.getChildAt(workouts_layout.getChildCount()-1)).addView(l);
 
         }
@@ -134,33 +157,10 @@ public class NotebookFragment extends Fragment  {
     public NotebookFragment() {
     }
 
-//    public static NotebookFragment newInstance(String param1, String param2) {
-//        NotebookFragment fragment = new NotebookFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//
-//        //Save the fragment's state here
-//    }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         nf = this;
-
-//        if (savedInstanceState != null) {
-//            //Restore the fragment's state here
-//        }
-
     }
 
     @Override

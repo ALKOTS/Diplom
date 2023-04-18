@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     static ConstraintLayout mainLayout;
     static LinearLayout loginLayout;
     ScheduleFragment scheduleFragment;
-    Fragment5 fragment5;
+    UserProfileFragment userProfileFragment;
     static String authToken = "";
     static String basic_url = "http://10.0.2.2:1488/pract/";
     LinearLayout registerLayout;
@@ -146,6 +146,32 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
+    public static void removeWorkout_request(View view, JSONObject workoutData){
+        String url = basic_url + "remove_workout/";
+
+        RequestQueue queue = Volley.newRequestQueue(view.getContext());
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, workoutData, response -> {
+            try {
+                System.out.println(response);
+                Toast.makeText(view.getContext(), "Success", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }, errorListener){
+            @Override
+            public Map<String,String> getHeaders(){
+                return new HashMap<String, String>(){{
+                    put("Authorization", "Token "+authToken);
+                }};
+            }
+        };
+
+        queue.add(jor);
+    }
+
     public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects, @Nullable JSONObject request_data){
         String url = basic_url+last_url;
 
@@ -191,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         notebookfragment = new NotebookFragment();
         addWorkoutFragment = new AddWorkoutFragment();
         scheduleFragment = new ScheduleFragment();
-        fragment5 = new Fragment5();
+        userProfileFragment = new UserProfileFragment();
 
         Bundle notebook_bundle = new Bundle();
         notebookfragment.setArguments(notebook_bundle);
@@ -212,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                     changeScreen(scheduleFragment);
                     break;
                 case R.id.item5:
-                    changeScreen(fragment5);
+                    changeScreen(userProfileFragment);
                     break;
             }
             return true;

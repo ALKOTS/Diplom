@@ -106,4 +106,87 @@
         </ScrollView>
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/singlePos"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shade"
+        android:elevation="5dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="50dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="50dp">
+        <Button
+            android:id="@+id/closeBtn"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="10dp"
+            android:text="X"
+            android:layout_gravity="end"
+            />
+        <!--        android:visibility="2"-->
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white">
+
+            <LinearLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/exerciseList"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:orientation="vertical">-->
+<!--                    -->
+<!--                </LinearLayout>-->
+
+
+                <TextView
+                    android:id="@+id/nameView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:text="Name"
+                    android:textSize="40sp"/>
+
+                <TextView
+                    android:id="@+id/timeView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="10:00 - 11:00"
+                    android:textSize="20sp"
+                    android:paddingBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/placeView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Hall 1"
+                    android:textSize="20sp"
+                    android:paddingBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/leaderView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mads Mikkelsen"
+                    android:textSize="20sp"
+                    android:paddingBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/descriptionView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="Nothing to show" />
+            </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
+
 </FrameLayout>

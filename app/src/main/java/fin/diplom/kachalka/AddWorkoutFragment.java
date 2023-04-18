@@ -344,25 +344,26 @@ public class AddWorkoutFragment extends Fragment {
         });
 
         view.findViewById(R.id.commitBtn).setOnClickListener(v -> {
-            ArrayList<String> endTime = new ArrayList<>(Arrays.asList(((String) endTimePicker.getText()).split(":")));
-            ArrayList<String> startTime = new ArrayList<>(Arrays.asList(((String) startTimePicker.getText()).split(":")));
+//            ArrayList<String> endTime = new ArrayList<>(Arrays.asList(((String) endTimePicker.getText()).split(":")));
+//            ArrayList<String> startTime = new ArrayList<>(Arrays.asList(((String) startTimePicker.getText()).split(":")));
             if(((EditText) view.findViewById(R.id.workoutName)).getText().toString().equals("")){
                 ((EditText) view.findViewById(R.id.workoutName)).setText("Workout");
             }
 
-            int length = 0;
-            if(Integer.parseInt(startTime.get(1))*60+Integer.parseInt(startTime.get(0))*3600>Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600){
-                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600+24*3600;
-            }else{
-                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600;
-            }
+//            int length = 0;
+//            if(Integer.parseInt(startTime.get(1))*60+Integer.parseInt(startTime.get(0))*3600>Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600){
+//                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600+24*3600;
+//            }else{
+//                length = Integer.parseInt(endTime.get(1))*60+Integer.parseInt(endTime.get(0))*3600 - Integer.parseInt(startTime.get(1))*60-Integer.parseInt(startTime.get(0))*3600;
+//            }
 
-            int finalLength = length;
+//            int finalLength = length;
             HashMap workoutData = new HashMap(){{
                 try {
                     put("name",((EditText)view.findViewById(R.id.workoutName)).getText().toString());
                     put("date", dateData);
-                    put("length", String.valueOf(finalLength));
+                    put("startTime", String.valueOf(startTimePicker.getText()));
+                    put("endTime", String.valueOf(endTimePicker.getText()));
                     put("exercises", new ArrayList(){{
                         for(int i = 0; i < exercisesObjects.size(); i++){
                             int finalI = i;
