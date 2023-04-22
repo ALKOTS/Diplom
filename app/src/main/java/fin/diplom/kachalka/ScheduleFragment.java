@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,34 +34,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-class SchPosOnClickListener implements View.OnClickListener
-{
-
-    Object pos;
-//    ScrollView newsFeedContainer;
-//    LinearLayout newsFeed,postFeed;
-
-    public SchPosOnClickListener(Object pos){//ScrollView news, Object post) {
-//        this.newsFeedContainer = news;
-        this.pos = pos;
-//        this.newsFeed = (LinearLayout) news.getChildAt(0);
-    }
-
-    @Override
-    public void onClick(View v)
-    {
-//        postFeed = NewsFragment.draw_post(newsFeedContainer.getChildAt(0), post, false);
-//        postFeed.removeView(postFeed.getChildAt(postFeed.getChildCount()-1));
+//class SchPosOnClickListener implements View.OnClickListener
+//{
 //
-//        postFeed.setOnClickListener(view -> {
-//            ((FrameLayout)newsFeedContainer.getParent()).removeView(((FrameLayout)newsFeedContainer.getParent()).getChildAt(1));
-//            newsFeedContainer.setVisibility(View.VISIBLE);
-//        });
-//        newsFeedContainer.setVisibility(View.GONE);
-//        ((FrameLayout)newsFeedContainer.getParent()).addView(postFeed);
-    }
-
-}
+//    Object pos;
+////    ScrollView newsFeedContainer;
+////    LinearLayout newsFeed,postFeed;
+//
+//    public SchPosOnClickListener(Object pos){//ScrollView news, Object post) {
+////        this.newsFeedContainer = news;
+//        this.pos = pos;
+////        this.newsFeed = (LinearLayout) news.getChildAt(0);
+//    }
+//
+//    @Override
+//    public void onClick(View v)
+//    {
+////        postFeed = NewsFragment.draw_post(newsFeedContainer.getChildAt(0), post, false);
+////        postFeed.removeView(postFeed.getChildAt(postFeed.getChildCount()-1));
+////
+////        postFeed.setOnClickListener(view -> {
+////            ((FrameLayout)newsFeedContainer.getParent()).removeView(((FrameLayout)newsFeedContainer.getParent()).getChildAt(1));
+////            newsFeedContainer.setVisibility(View.VISIBLE);
+////        });
+////        newsFeedContainer.setVisibility(View.GONE);
+////        ((FrameLayout)newsFeedContainer.getParent()).addView(postFeed);
+//    }
+//
+//}
 
 public class ScheduleFragment extends Fragment {
     ScheduleFragment sf;
@@ -68,6 +69,25 @@ public class ScheduleFragment extends Fragment {
     FrameLayout singlePosView;
     ScrollView scheduleContainer;
     public ScheduleFragment() {
+    }
+
+    public void draw_single_activity(JSONObject response, Object pos){
+            singlePosView.setVisibility(View.VISIBLE);
+            ((TextView)singlePosView.findViewById(R.id.nameView)).setText((String) ((Map) ((Map)pos).get("activity")).get("name"));
+            ((TextView)singlePosView.findViewById(R.id.timeView)).setText(String.format("%s - %s", ((String)((Map) pos).get("startTime")).substring(0,5), ((String)((Map) pos).get("endTime")).substring(0,5)));
+            ((TextView)singlePosView.findViewById(R.id.placeView)).setText((String) ((Map) pos).get("place"));
+            ((TextView)singlePosView.findViewById(R.id.leaderView)).setText((String) ((Map) ((Map) pos).get("leader")).get("name"));
+            ((TextView)singlePosView.findViewById(R.id.spotsView)).setText(String.format("Available spots: %s", ((Double) ((Double) (((Map) pos).get("people_limit")) - (Double) ((Map) pos).get("people_enlisted"))).intValue()));
+            ((TextView)singlePosView.findViewById(R.id.descriptionView)).setText((String) ((Map) pos).get("description"));
+
+            Button enrollBtn = singlePosView.findViewById(R.id.enrollBtn);
+
+            if((Double) new Gson().fromJson(String.valueOf(response), HashMap.class).get("enrolled")==0){
+                enrollBtn.setText("Enroll");
+            }
+            else {
+                enrollBtn.setText("Cancel");
+            }
     }
 
     public LinearLayout draw_schedule_position(View view, ArrayList<Object> day_objects, String date){
@@ -93,12 +113,12 @@ public class ScheduleFragment extends Fragment {
             ((TextView)drawn_pos.findViewById(R.id.leader)).setText((String) ((Map) ((Map) pos).get("leader")).get("name"));
 
             drawn_pos.setOnClickListener(view1 -> {
-                singlePosView.setVisibility(View.VISIBLE);
-                ((TextView)singlePosView.findViewById(R.id.nameView)).setText((String) ((Map) ((Map)pos).get("activity")).get("name"));
-                ((TextView)singlePosView.findViewById(R.id.timeView)).setText(String.format("%s - %s", ((String)((Map) pos).get("startTime")).substring(0,5), ((String)((Map) pos).get("endTime")).substring(0,5)));
-                ((TextView)singlePosView.findViewById(R.id.placeView)).setText((String) ((Map) pos).get("place"));
-                ((TextView)singlePosView.findViewById(R.id.leaderView)).setText((String) ((Map) ((Map) pos).get("leader")).get("name"));
-                ((TextView)singlePosView.findViewById(R.id.descriptionView)).setText((String) ((Map) pos).get("description"));
+                try {
+                    Method draw_single_activity = ScheduleFragment.class.getMethod("draw_single_activity", JSONObject.class, Object.class);
+                    MainActivity.post_request(view1, new JSONObject(){{put("id",((Map)pos).get("id"));}}, "check_for_appointment",null, draw_single_activity,sf, pos);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
             day.addView(drawn_pos);
         }
@@ -111,10 +131,10 @@ public class ScheduleFragment extends Fragment {
 
         HashMap<String, ArrayList<Object>> schedule = new HashMap<>();
 
-        LocalDate monday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("monday"));
-        LocalDate next_monday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("next_monday"));
+        LocalDate weekday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("weekday"));
+        LocalDate next_weekday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("next_weekday"));
 
-        for (LocalDate date = monday; date.isBefore(next_monday); date = date.plusDays(1)) {
+        for (LocalDate date = weekday; date.isBefore(next_weekday); date = date.plusDays(1)) {
             schedule.put(date.toString(),new ArrayList<>());
         }
 
@@ -123,7 +143,7 @@ public class ScheduleFragment extends Fragment {
         }
         System.out.println(schedule);
 
-        for (LocalDate date = monday; date.isBefore(next_monday); date = date.plusDays(1)) {
+        for (LocalDate date = weekday; date.isBefore(next_weekday); date = date.plusDays(1)) {
             timeTable.addView(draw_schedule_position(view, schedule.get(date.toString()), date.toString()));
         }
 

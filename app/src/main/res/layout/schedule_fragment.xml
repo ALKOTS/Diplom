@@ -126,6 +126,14 @@
             />
         <!--        android:visibility="2"-->
 
+        <Button
+            android:id="@+id/enrollBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Enroll"
+            android:layout_gravity="start|bottom"/>
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -176,6 +184,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Mads Mikkelsen"
+                    android:textSize="20sp"
+                    android:paddingBottom="5dp"/>
+                <TextView
+                    android:id="@+id/spotsView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Available spots: 20"
                     android:textSize="20sp"
                     android:paddingBottom="5dp"/>
 

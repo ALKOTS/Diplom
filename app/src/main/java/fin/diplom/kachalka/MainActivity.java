@@ -120,15 +120,22 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
-    public static void postWorkout_request(View view, JSONObject workoutData){
-        String url = basic_url + "add_workout/";
+    public static void post_request(View view, JSONObject data, String url, @Nullable String text, @Nullable Method method, @Nullable Object fragment, @Nullable Object object){
+        url = basic_url + url;//"add_workout/";
 
         RequestQueue queue = Volley.newRequestQueue(view.getContext());
 
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, workoutData, response -> {
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, data, response -> {
             try {
                 System.out.println(response);
-                Toast.makeText(view.getContext(), "Success", Toast.LENGTH_SHORT).show();
+                if(text!=null){
+                    Toast.makeText(view.getContext(), text, Toast.LENGTH_SHORT).show();
+                }
+
+                if(method!=null){
+                    method.invoke(fragment, response, object);
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -146,31 +153,6 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
-    public static void removeWorkout_request(View view, JSONObject workoutData){
-        String url = basic_url + "remove_workout/";
-
-        RequestQueue queue = Volley.newRequestQueue(view.getContext());
-
-        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, workoutData, response -> {
-            try {
-                System.out.println(response);
-                Toast.makeText(view.getContext(), "Success", Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
-        }, errorListener){
-            @Override
-            public Map<String,String> getHeaders(){
-                return new HashMap<String, String>(){{
-                    put("Authorization", "Token "+authToken);
-                }};
-            }
-        };
-
-        queue.add(jor);
-    }
 
     public static void get_request(Object obj, String last_url, View view, Method fill_view, @Nullable ArrayList<Object> objects, @Nullable JSONObject request_data){
         String url = basic_url+last_url;

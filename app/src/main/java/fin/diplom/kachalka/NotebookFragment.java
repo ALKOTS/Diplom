@@ -1,8 +1,6 @@
 package fin.diplom.kachalka;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,18 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,7 +133,7 @@ public class NotebookFragment extends Fragment  {
 //                                    ((LinearLayout)workouts_layout.getChildAt(workouts_layout.getChildCount()-1)).removeView(l);
                         l.setVisibility(View.GONE);
                         try {
-                            MainActivity.removeWorkout_request(view1, new JSONObject().put("id",workout.get("id")));
+                            MainActivity.post_request(view1, new JSONObject().put("id",workout.get("id")), "remove_workout/", "Success", null, null, null);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

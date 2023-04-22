@@ -9,11 +9,9 @@ import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -383,7 +381,7 @@ public class AddWorkoutFragment extends Fragment {
             JSONObject requestData = new JSONObject(workoutData);
 //            System.out.println(workoutData);
 //            System.out.println(requestData);
-            MainActivity.postWorkout_request(view, requestData);
+            MainActivity.post_request(view, requestData, "add_workout/", "Success", null, null, null);
         });
     }
 }
