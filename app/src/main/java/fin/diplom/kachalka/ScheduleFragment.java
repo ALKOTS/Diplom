@@ -90,7 +90,7 @@ public class ScheduleFragment extends Fragment {
             }
     }
 
-    public LinearLayout draw_schedule_position(View view, ArrayList<Object> day_objects, String date){
+    public LinearLayout draw_schedule_position(View view, ArrayList<Object> day_objects, String date, Map people_enlisted_map){
         LinearLayout day = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.schedule_day_layout, null, false);
         date = date.split("-")[2]+ " "+view.getResources().getStringArray(R.array.months_list)[Integer.parseInt(date.split("-")[1])-1]+" "+date.split("-")[0];
         ((TextView)day.getChildAt(0)).setText(date);
@@ -102,6 +102,16 @@ public class ScheduleFragment extends Fragment {
             return day;
         }
         for (Object pos:day_objects){
+            double people_enlisted = 0.0;
+            if(people_enlisted_map.get(String.valueOf(((Double)((Map)pos).get("id")).intValue()))!=null){
+                people_enlisted = (double) people_enlisted_map.get(String.valueOf(((Double)((Map)pos).get("id")).intValue()));
+            }
+            System.out.println(people_enlisted_map);
+            System.out.println( people_enlisted_map.get(String.valueOf(((Double)((Map)pos).get("id")).intValue())) );
+            System.out.println( ((Map) pos).get("people_enlisted") );
+
+
+            ((Map)pos).put("people_enlisted", people_enlisted);
             LinearLayout drawn_pos = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.schedule_position_layout, null, false);
             ((TextView)drawn_pos.findViewById(R.id.name)).setText((String) ((Map) ((Map)pos).get("activity")).get("name"));
             ((TextView)drawn_pos.findViewById(R.id.timeStamp)).setText(String.format("%s - %s", ((String)((Map) pos).get("startTime")).substring(0,5), ((String)((Map) pos).get("endTime")).substring(0,5)));
@@ -134,6 +144,8 @@ public class ScheduleFragment extends Fragment {
         LocalDate weekday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("weekday"));
         LocalDate next_weekday = LocalDate.parse((String) new Gson().fromJson(String.valueOf(response), HashMap.class).get("next_weekday"));
 
+        Map people_enlisted = (Map) new Gson().fromJson(String.valueOf(response), HashMap.class).get("people_enlisted");
+
         for (LocalDate date = weekday; date.isBefore(next_weekday); date = date.plusDays(1)) {
             schedule.put(date.toString(),new ArrayList<>());
         }
@@ -141,10 +153,9 @@ public class ScheduleFragment extends Fragment {
         for(Object pos:schedule_response){
             schedule.get(((Map)pos).get("date")).add(pos);
         }
-        System.out.println(schedule);
 
         for (LocalDate date = weekday; date.isBefore(next_weekday); date = date.plusDays(1)) {
-            timeTable.addView(draw_schedule_position(view, schedule.get(date.toString()), date.toString()));
+            timeTable.addView(draw_schedule_position(view, schedule.get(date.toString()), date.toString(), people_enlisted));
         }
 
 //        System.out.println(scheduleContainer.getMeasuredHeight()+" "+timeTable.getMeasuredHeight());
@@ -189,17 +200,6 @@ public class ScheduleFragment extends Fragment {
                 e.printStackTrace();
             }
         }});
-
-//        offset.updateAndGet(v->v+1);
-//        MainActivity.get_request(sf, "return_schedule", view, fill_schedule, null, new JSONObject(){{
-//            try {
-//                put("now", DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now()));
-//                put("offset",offset);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }});
-
 
         Method finalFill_schedule1 = fill_schedule;
         scheduleContainer.getViewTreeObserver()
