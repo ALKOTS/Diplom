@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     ScheduleFragment scheduleFragment;
     UserProfileFragment userProfileFragment;
     static String authToken = "";
-    static String basic_url = "http://10.0.2.2:1488/pract/";
+    static String basic_url = "http://10.0.2.2:8080/pract/";
     LinearLayout registerLayout;
     static Response.ErrorListener errorListener;
 
@@ -82,17 +82,12 @@ public class MainActivity extends AppCompatActivity {
                     for (Object error: errors.keySet()){
                         Toast.makeText(ctx,errors.get(error).toString(), Toast.LENGTH_LONG).show();
                     }
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
         }, errorListener);
-
         queue.add(jor);
-
     }
 
     public void login_request(String login, String password) throws JSONException {
@@ -113,10 +108,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-
         }, errorListener);
-
         queue.add(jor);
     }
 

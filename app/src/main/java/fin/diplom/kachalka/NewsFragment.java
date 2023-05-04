@@ -77,7 +77,7 @@ public class NewsFragment extends Fragment {
         ((TextView)postLayout.getChildAt(0)).setText(date);
         ((TextView)postLayout.getChildAt(1)).setText((String)((Map)post).get("title"));
         ((TextView)postLayout.getChildAt(2)).setText((String)((Map)post).get("sub_title"));
-        ((TextView)postLayout.getChildAt(3)).setText((String)((Map)post).get(text));
+        ((TextView)postLayout.findViewById(R.id.textView)).setText(text);
 
         return postLayout;
     }

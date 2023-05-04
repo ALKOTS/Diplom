@@ -112,11 +112,16 @@ public class AddWorkoutFragment extends Fragment {
         });
 
         tp.setOnTimeChangedListener((timePicker, i, i1) ->{
+            String h,m;
+            h = String.valueOf(i);
+            m = String.valueOf(i1);
             if(i1<10){
-                picker.setText(MessageFormat.format("{0}:0{1}", i, i1));
-                return;
+                m = "0"+i1;
             }
-            picker.setText(i+":"+i1);
+            if(i<10){
+                h = "0"+i;
+            }
+            picker.setText(h+":"+m);
         });
     }
 

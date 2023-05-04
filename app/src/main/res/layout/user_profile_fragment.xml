@@ -12,18 +12,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
+        android:textSize="30sp"
         android:paddingBottom="5dp"/>
     <TextView
         android:id="@+id/lastNameView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
+        android:textSize="30sp"
         android:paddingBottom="5dp"/>
     <TextView
         android:id="@+id/emailView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
+        android:textSize="20sp"
+        android:paddingBottom="5dp"/>
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="List of appointments"
+        android:textSize="17sp"
         android:paddingBottom="5dp"/>
 
     <ScrollView
