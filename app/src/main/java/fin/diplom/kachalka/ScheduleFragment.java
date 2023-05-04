@@ -190,12 +190,22 @@ public class ScheduleFragment extends Fragment {
             }
         }});
 
+//        offset.updateAndGet(v->v+1);
+//        MainActivity.get_request(sf, "return_schedule", view, fill_schedule, null, new JSONObject(){{
+//            try {
+//                put("now", DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDateTime.now()));
+//                put("offset",offset);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }});
+
 
         Method finalFill_schedule1 = fill_schedule;
         scheduleContainer.getViewTreeObserver()
                 .addOnScrollChangedListener(() -> {
                     if ((timeTable.getBottom() <= (scheduleContainer.getHeight() + scheduleContainer.getScrollY())) && timeTable.getBottom()> lastBottom.get()) {
-                        offset.updateAndGet(v -> v + 1);
+                        offset.updateAndGet(v -> v + 2);
                         lastBottom.set(timeTable.getBottom());
                         MainActivity.get_request(sf, "return_schedule", view, finalFill_schedule1,null, new JSONObject(){{
                             try {
