@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -23,7 +22,6 @@ import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -71,23 +69,55 @@ public class ScheduleFragment extends Fragment {
     public ScheduleFragment() {
     }
 
+    public void invert_enroll_btn(Button enrollBtn, boolean enrolled){
+        if(!enrolled){
+            enrollBtn.setText("Enroll");
+        }
+        else {
+            enrollBtn.setText("Cancel");
+        }
+    }
+
     public void draw_single_activity(JSONObject response, Object pos){
-            singlePosView.setVisibility(View.VISIBLE);
-            ((TextView)singlePosView.findViewById(R.id.nameView)).setText((String) ((Map) ((Map)pos).get("activity")).get("name"));
-            ((TextView)singlePosView.findViewById(R.id.timeView)).setText(String.format("%s - %s", ((String)((Map) pos).get("startTime")).substring(0,5), ((String)((Map) pos).get("endTime")).substring(0,5)));
-            ((TextView)singlePosView.findViewById(R.id.placeView)).setText((String) ((Map) pos).get("place"));
-            ((TextView)singlePosView.findViewById(R.id.leaderView)).setText((String) ((Map) ((Map) pos).get("leader")).get("name"));
-            ((TextView)singlePosView.findViewById(R.id.spotsView)).setText(String.format("Available spots: %s", ((Double) ((Double) (((Map) pos).get("people_limit")) - (Double) ((Map) pos).get("people_enlisted"))).intValue()));
-            ((TextView)singlePosView.findViewById(R.id.descriptionView)).setText((String) ((Map) pos).get("description"));
+        singlePosView.setVisibility(View.VISIBLE);
+        ((TextView)singlePosView.findViewById(R.id.nameView)).setText((String) ((Map) ((Map)pos).get("activity")).get("name"));
+        ((TextView)singlePosView.findViewById(R.id.timeView)).setText(String.format("%s - %s", ((String)((Map) pos).get("startTime")).substring(0,5), ((String)((Map) pos).get("endTime")).substring(0,5)));
+        ((TextView)singlePosView.findViewById(R.id.placeView)).setText((String) ((Map) pos).get("place"));
+        ((TextView)singlePosView.findViewById(R.id.leaderView)).setText((String) ((Map) ((Map) pos).get("leader")).get("name"));
+        ((TextView)singlePosView.findViewById(R.id.spotsView)).setText(String.format("Available spots: %s", ((Double) ((Double) (((Map) pos).get("people_limit")) - (Double) ((Map) pos).get("people_enlisted"))).intValue()));
+        ((TextView)singlePosView.findViewById(R.id.descriptionView)).setText((String) ((Map) pos).get("description"));
 
-            Button enrollBtn = singlePosView.findViewById(R.id.enrollBtn);
+        Button enrollBtn = singlePosView.findViewById(R.id.enrollBtn);
 
-            if((Double) new Gson().fromJson(String.valueOf(response), HashMap.class).get("enrolled")==0){
-                enrollBtn.setText("Enroll");
+        AtomicReference<Boolean> enrolled = new AtomicReference<>();
+
+        if((Double) new Gson().fromJson(String.valueOf(response), HashMap.class).get("enrolled")==0){
+            enrolled.set(Boolean.FALSE);
+        }else {
+            enrolled.set(Boolean.TRUE);
+        }
+
+
+
+        invert_enroll_btn(enrollBtn, enrolled.get());
+
+        if(((TextView)singlePosView.findViewById(R.id.spotsView)).getText() == "0" && !enrolled.get()){
+            enrollBtn.setEnabled(false);
+        }
+
+        Boolean finalEnrolled = enrolled.get();
+        enrollBtn.setOnClickListener(view -> {
+            try {
+                MainActivity.enroll_request(sf.getContext(), new JSONObject(){{put("enrolled", finalEnrolled); put("schedule_position", ((Map)pos).get("id"));}});
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            else {
-                enrollBtn.setText("Cancel");
-            }
+            enrolled.set(!enrolled.get());
+            invert_enroll_btn(enrollBtn, enrolled.get());
+        });
+
+
     }
 
     public LinearLayout draw_schedule_position(View view, ArrayList<Object> day_objects, String date, Map people_enlisted_map){

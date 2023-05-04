@@ -112,6 +112,28 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jor);
     }
 
+    public static void enroll_request(Context view, JSONObject data) throws JSONException {
+        String url = basic_url + "enroll/";
+
+        RequestQueue queue = Volley.newRequestQueue(view);
+
+        JsonObjectRequest jor = new JsonObjectRequest(Request.Method.POST, url, data, response -> {
+            try {
+                Toast.makeText(view, "Success", Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, errorListener){
+            @Override
+            public Map<String,String> getHeaders(){
+                return new HashMap<String, String>(){{
+                    put("Authorization", "Token "+authToken);
+                }};
+            }
+        };
+        queue.add(jor);
+    }
+
     public static void post_request(View view, JSONObject data, String url, @Nullable String text, @Nullable Method method, @Nullable Object fragment, @Nullable Object object){
         url = basic_url + url;//"add_workout/";
 
